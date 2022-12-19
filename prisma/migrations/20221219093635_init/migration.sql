@@ -1,11 +1,16 @@
+-- CreateEnum
+CREATE TYPE "Permissions" AS ENUM ('CreateRoom', 'EditRoom', 'DeleteRoom', 'KickUser', 'BanUser', 'God_Admin', 'Admin');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "friendId" TEXT NOT NULL,
+    "friendId" TEXT,
     "voiceRoomId" TEXT,
+    "IsVerified" BOOLEAN NOT NULL DEFAULT false,
+    "verificationCode" INTEGER,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -14,8 +19,19 @@ CREATE TABLE "User" (
 CREATE TABLE "Cahnnel" (
     "id" TEXT NOT NULL,
     "ownerId" TEXT NOT NULL,
+    "isPublic" BOOLEAN NOT NULL DEFAULT true,
 
     CONSTRAINT "Cahnnel_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Role" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "permissions" "Permissions"[],
+    "channelId" TEXT NOT NULL,
+
+    CONSTRAINT "Role_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -49,6 +65,7 @@ CREATE TABLE "VoiceRoom" (
 CREATE TABLE "Message" (
     "id" SERIAL NOT NULL,
     "authorId" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
     "sentAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "textRoomId" TEXT,
 
@@ -114,16 +131,19 @@ CREATE UNIQUE INDEX "_MessageToReaction_AB_unique" ON "_MessageToReaction"("A", 
 CREATE INDEX "_MessageToReaction_B_index" ON "_MessageToReaction"("B");
 
 -- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_friendId_fkey" FOREIGN KEY ("friendId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "User" ADD CONSTRAINT "User_friendId_fkey" FOREIGN KEY ("friendId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_voiceRoomId_fkey" FOREIGN KEY ("voiceRoomId") REFERENCES "VoiceRoom"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Cahnnel" ADD CONSTRAINT "Cahnnel_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Cahnnel" ADD CONSTRAINT "Cahnnel_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Topic" ADD CONSTRAINT "Topic_channelId_fkey" FOREIGN KEY ("channelId") REFERENCES "Cahnnel"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Role" ADD CONSTRAINT "Role_channelId_fkey" FOREIGN KEY ("channelId") REFERENCES "Cahnnel"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Topic" ADD CONSTRAINT "Topic_channelId_fkey" FOREIGN KEY ("channelId") REFERENCES "Cahnnel"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "TextRoom" ADD CONSTRAINT "TextRoom_topicId_fkey" FOREIGN KEY ("topicId") REFERENCES "Topic"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client/generated"
 }
 
 datasource db {
@@ -8,35 +9,50 @@ datasource db {
 }
 
 model User {
-  id              String          @id @default(uuid())
-  email           String          @unique
-  username        String          @unique
-  password        String
-  friends         User[]          @relation("Friends")
-  friend          User            @relation("Friends", references: [id], fields: [friendId])
-  friendId        String
-  joinedChannels  Cahnnel[]       @relation("JoinedChannels")
-  createdChannels Cahnnel[]       @relation("CreatedChannels")
-  UserOnChannel   UserOnChannel[]
-  messages        Message[] 
-  VoiceRoom       VoiceRoom?      @relation(fields: [voiceRoomId], references: [id])
-  voiceRoomId     String?
+  id                 String          @id @default(uuid())
+  email              String          @unique
+  username           String          @unique
+  password           String
+  friends            User[]          @relation("Friends")
+  friend             User?           @relation("Friends", references: [id], fields: [friendId], onDelete: SetNull)
+  friendId           String?
+  joinedChannels     Channel[]       @relation("JoinedChannels")
+  createdChannels    Channel[]       @relation("CreatedChannels")
+  UserOnChannel      UserOnChannel[]
+  messages           Message[]
+  VoiceRoom          VoiceRoom?      @relation(fields: [voiceRoomId], references: [id], onDelete: SetNull)
+  voiceRoomId        String?
+  IsVerified         Boolean         @default(false)
+  verificationCode   Int?
+  resetPasswordAttempt Int @default(0)
+  lastResetPasswordAttempt DateTime? @db.Timestamp()
+  lastLoginIpAddress String?
 }
 
-model Cahnnel {
-  id            String          @id @default(uuid())
-  members       User[]          @relation("JoinedChannels")
-  owner         User            @relation("CreatedChannels", fields: [ownerId], references: [id])
+model Channel {
+  id            String           @id @default(uuid())
+  members       User[]           @relation("JoinedChannels")
+  owner         User             @relation("CreatedChannels", fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId       String
   UserOnChannel UserOnChannel[]
   Topics        Topic[]
+  isPublic      Boolean          @default(true)
+  roles         Role[]
+}
+
+model Role {
+  id          String        @id @default(uuid())
+  name        String
+  permissions Permissions[]
+  channel     Channel       @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  channelId   String
 }
 
 model Topic {
-  id        Int         @id @default(autoincrement())
-  name     String
-  channel   Cahnnel     @relation(fields: [channelId], references: [id])
-  channelId String
+  id         Int         @id @default(autoincrement())
+  name       String
+  channel    Channel     @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  channelId  String
   TextRooms  TextRoom[]
   VoiceRooms VoiceRoom[]
 }
@@ -61,6 +77,7 @@ model Message {
   id                Int                 @id @default(autoincrement())
   author            User                @relation(fields: [authorId], references: [id])
   authorId          String
+  content           String
   sentAt            DateTime            @default(now())
   reactions         Reaction[]
   MessageOnReaction MessageOnReaction[]
@@ -87,9 +104,19 @@ model MessageOnReaction {
 model UserOnChannel {
   user       User     @relation(fields: [userId], references: [id])
   userId     String
-  cahnnel    Cahnnel  @relation(fields: [channelId], references: [id])
+  cahnnel    Channel  @relation(fields: [channelId], references: [id])
   channelId  String
   assignedAt DateTime @default(now())
 
   @@id([userId, channelId])
+}
+
+enum Permissions {
+  CreateRoom
+  EditRoom
+  DeleteRoom
+  KickUser
+  BanUser
+  God_Admin
+  Admin
 }

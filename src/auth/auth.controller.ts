@@ -1,6 +1,124 @@
-import { Controller } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Ip,
+  Param,
+  Post,
+  Query,
+  Req,
+  Res,
+} from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
+import { RegisterCommand } from './commands/impl/register.command';
+import { RegisterCommandHandler } from './commands/handlers/register-command.handler';
+import { PrismaService } from '../prisma.service';
+import { RegisterDto } from './dtos/register.dto';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import { LoginDto } from './dtos/login.dto';
+import { LoginCommand } from './commands/impl/login.command';
+import { Request, Response } from 'express';
+import { JwtService } from '@nestjs/jwt';
+import * as process from 'process';
+import { VerifyAccountCommand } from './commands/impl/verify-account.command';
+import {
+  ForgotPasswordDto,
+  SendForgotPasswordDto,
+} from './dtos/forgot-password.dto';
+import { SendForgotPasswordCommand } from './commands/impl/send-forgotPassword.command';
+import { ResetPasswordCommand } from './commands/impl/reset-password.command';
 
-@Controller()
+@Controller({
+  version: '1',
+  path: 'auth',
+})
+@ApiTags('Auth')
 export class AuthController {
-    
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly jwtService: JwtService,
+  ) {}
+  @Post('register')
+  @ApiBody({ type: RegisterDto, required: true })
+  @ApiConsumes('application/x-www-form-urlencoded')
+  public async register(@Body() { email, username, password }: RegisterDto) {
+    try {
+      await this.commandBus.execute(
+        new RegisterCommand(email, username, password),
+      );
+      return 'Success.';
+    } catch (err) {
+      return `Some problem happened while registering err : ${err.message}`;
+    }
+  }
+  @Post('login')
+  @ApiBody({ type: LoginDto, required: true })
+  @ApiConsumes('application/x-www-form-urlencoded')
+  public async login(
+    @Body() { identifier, password }: LoginDto,
+    @Ip() ip: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    try {
+      const email = await this.commandBus.execute(
+        new LoginCommand(identifier, password, ip.split('f:')[1]),
+      );
+      const token = await this.jwtService.signAsync(
+        { email },
+        { secret: process.env.JWT_SECRET, expiresIn: Date.now() + 1200 },
+      );
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: true,
+      });
+      return 'Logged in successfully.';
+    } catch (err) {
+      return `Some problem happened while login err : ${err.message}`;
+    }
+  }
+  @Post('verify/:code')
+  @ApiParam({ type: 'number', required: true, name: 'code' })
+  public async verifyAccount(@Param('code') code: number) {
+    try {
+      if (code.toString().length !== 6)
+        throw new BadRequestException('Code must be 6 digits');
+      await this.commandBus.execute(new VerifyAccountCommand(code));
+      return 'Success.';
+    } catch (err) {
+      return `Some problem happened while verifying account err : ${err.message}`;
+    }
+  }
+  @Post('forgot-password')
+  @ApiBody({ type: [SendForgotPasswordDto], required: true })
+  public async forgotPassword(@Body() { email }: SendForgotPasswordDto) {
+    try {
+      await this.commandBus.execute(new SendForgotPasswordCommand(email));
+      return 'Success.';
+    } catch (err) {
+      return `Some problem happened while verifying account err : ${err.message}`;
+    }
+  }
+  @Post('forgot-password')
+  @ApiBody({ type: [ForgotPasswordDto], required: true })
+  @ApiQuery({ type: 'string', required: true, name: 'token' })
+  public async resetPassword(
+    @Body() { password }: ForgotPasswordDto,
+    @Query() token: string,
+  ) {
+    try {
+      const { email } = await this.jwtService.verifyAsync(token, {
+        secret: process.env.JWT_SECRET,
+      });
+      await this.commandBus.execute(new ResetPasswordCommand(email, password));
+      return 'Success.';
+    } catch (err) {
+      return `Some problem happened while verifying account err : ${err.message}`;
+    }
+  }
 }

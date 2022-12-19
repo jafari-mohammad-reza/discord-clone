@@ -1,7 +1,7 @@
 import { IsEmail, IsString, Length, Matches } from 'class-validator';
-import { ApiParam, ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
-export class RegisterDto {
+export class SendForgotPasswordDto {
   @IsEmail()
   @Matches(/^[a-z0-9](\.?[a-z0-9]){5,}@g(oogle)?mail\.com$/) // only accepts gmail and googlemail  domain
   @ApiProperty({
@@ -10,16 +10,9 @@ export class RegisterDto {
     name: 'email',
   })
   email: string;
-  @IsString()
-  @Length(4, 12)
-  @ApiProperty({
-    type: 'string',
-    required: true,
-    minLength: 4,
-    maxLength: 12,
-    name: 'username',
-  })
-  username: string;
+}
+
+export class ForgotPasswordDto {
   @IsString()
   @Matches(/^.*(?=.{6,})(?=.*[a-zA-Z])(?=.*\d)(?=.*[!&$%? "]).*$/)
   @Length(8, 16)
