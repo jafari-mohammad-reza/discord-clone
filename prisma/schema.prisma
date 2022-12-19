@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String          @id @default(uuid())
+  email           String          @unique
+  username        String          @unique
+  password        String
+  friends         User[]          @relation("Friends")
+  friend          User            @relation("Friends", references: [id], fields: [friendId])
+  friendId        String
+  joinedChannels  Cahnnel[]       @relation("JoinedChannels")
+  createdChannels Cahnnel[]       @relation("CreatedChannels")
+  UserOnChannel   UserOnChannel[]
+  messages        Message[] 
+  VoiceRoom       VoiceRoom?      @relation(fields: [voiceRoomId], references: [id])
+  voiceRoomId     String?
+}
+
+model Cahnnel {
+  id            String          @id @default(uuid())
+  members       User[]          @relation("JoinedChannels")
+  owner         User            @relation("CreatedChannels", fields: [ownerId], references: [id])
+  ownerId       String
+  UserOnChannel UserOnChannel[]
+  Topics        Topic[]
+}
+
+model Topic {
+  id        Int         @id @default(autoincrement())
+  name     String
+  channel   Cahnnel     @relation(fields: [channelId], references: [id])
+  channelId String
+  TextRooms  TextRoom[]
+  VoiceRooms VoiceRoom[]
+}
+
+model TextRoom {
+  id       String    @id @default(uuid())
+  name     String
+  topic    Topic     @relation(fields: [topicId], references: [id])
+  topicId  Int
+  messages Message[]
+}
+
+model VoiceRoom {
+  id          String @id @default(uuid())
+  name        String
+  topic       Topic  @relation(fields: [topicId], references: [id])
+  topicId     Int
+  participate User[]
+}
+
+model Message {
+  id                Int                 @id @default(autoincrement())
+  author            User                @relation(fields: [authorId], references: [id])
+  authorId          String
+  sentAt            DateTime            @default(now())
+  reactions         Reaction[]
+  MessageOnReaction MessageOnReaction[]
+  TextRoom          TextRoom?           @relation(fields: [textRoomId], references: [id])
+  textRoomId        String?
+}
+
+model Reaction {
+  id                Int                 @id @default(autoincrement())
+  emojiKey          String              @unique
+  message           Message[]
+  MessageOnReaction MessageOnReaction[]
+}
+
+model MessageOnReaction {
+  message    Message  @relation(fields: [messageId], references: [id])
+  messageId  Int
+  reaction   Reaction @relation(fields: [reactionId], references: [id])
+  reactionId Int
+
+  @@id([reactionId, messageId])
+}
+
+model UserOnChannel {
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  cahnnel    Cahnnel  @relation(fields: [channelId], references: [id])
+  channelId  String
+  assignedAt DateTime @default(now())
+
+  @@id([userId, channelId])
+}

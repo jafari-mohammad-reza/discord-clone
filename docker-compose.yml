@@ -1,0 +1,87 @@
+version: '3.8'
+services:
+    dev:
+      container_name: nestjs_api_dev
+      image: nestjs-api-dev:1.0.0
+      build:
+          context: .
+          target: development
+          dockerfile: ./Dockerfile
+      command: npm run start:debug
+      environment :
+        DATABASE_URL: postgresql:admin:admin@postgres/discord
+      ports:
+          - 3000:3000
+          - 9229:9229
+      networks:
+          - discord_network
+      volumes:
+          - .:/usr/src/app
+          - /usr/src/app/node_modules
+      restart: unless-stopped
+    prod:
+      container_name: nestjs_api_prod
+      image: nestjs-api-prod:1.0.0
+      build:
+          context: .
+          target: production
+          dockerfile: ./Dockerfile
+      command: yarn run start:prod
+      ports:
+          - 3000:3000
+          - 9229:9229
+      networks:
+          - discord_network
+      volumes:
+          - .:/usr/src/app
+          - /usr/src/app/node_modules
+      restart: unless-stopped
+    postgres:
+      image: postgres
+      container_name: postgres
+      restart: always
+      networks:
+        - discord_network
+      ports:
+        - "5432:5432"
+      environment:
+        POSTGRES_USER: admin
+        POSTGRES_PASSWORD: admin
+      volumes:
+        - postgres:/var/lib/postgresql/data
+    pgadmin:
+      image: dpage/pgadmin4
+      container_name: pgadmin4_container
+      restart: always
+      ports:
+        - "5050:80"
+      environment:
+        PGADMIN_DEFAULT_EMAIL: admin@gmail.com
+        PGADMIN_DEFAULT_PASSWORD: admin
+      volumes:
+        - pgadmin-data:/var/lib/pgadmin
+      networks:
+        - discord_network
+      depends_on:
+        - postgres
+      command:
+        - CREATE DB Blog_App
+    redis:
+      image: redis:alpine
+      command:
+        - redis-server
+      ports:
+        - "6379:6379"
+      container_name: redis
+      networks:
+        - discord_network
+      volumes:
+        - redis-data:/data
+        - redis-conf:/usr/local/etc/redis/redis.conf
+volumes:
+  postgres:
+  pgadmin-data:
+  redis-data:
+  redis-conf:
+networks:
+    discord_network:
