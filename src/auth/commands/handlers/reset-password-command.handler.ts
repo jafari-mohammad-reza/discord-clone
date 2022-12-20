@@ -28,7 +28,7 @@ export class ResetPasswordCommandHandler
       data: {
         password,
         resetPasswordAttempt: { increment: 1 },
-        lastResetPasswordAttempt: new Date().getDate().toString(),
+        lastResetPasswordAttempt: new Date(),
       },
     });
   }

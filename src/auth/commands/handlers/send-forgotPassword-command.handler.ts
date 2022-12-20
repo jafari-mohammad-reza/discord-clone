@@ -26,7 +26,7 @@ export class SendForgotPasswordCommandHandler
     const currentDate = new Date();
     if (
       resetPasswordAttempt >= 3 ||
-      Number(lastResetPasswordAttempt) <
+      Number(lastResetPasswordAttempt) >
         currentDate.setDate(currentDate.getDate() - 30)
     ) {
       throw new MethodNotAllowedException(

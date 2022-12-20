@@ -1,3 +1,3 @@
 export class SendForgotPasswordEvent {
-  constructor(private readonly email) {}
+  constructor(public readonly email) {}
 }

@@ -4,20 +4,17 @@ import { ChannelModule } from './channel/channel.module';
 import { UserModule } from './user/user.module';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MailModule } from './mail/mail.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    JwtModule.registerAsync({
-      useFactory: () => ({
-        secret: process.env.JWT_SECRET,
-      }),
-    }),
+
     AuthModule,
     UserModule,
     ChannelModule,
+    MailModule,
   ],
   controllers: [],
   providers: [],
-  exports: [JwtModule],
 })
 export class AppModule {}

@@ -24,6 +24,8 @@ export class RegisterCommandHandler
     await this.prismaService.user.create({
       data: { email, username, password, verificationCode: verificationCode },
     });
-    return this.eventBus.publish(new RegisterEvent(email, verificationCode));
+    return this.eventBus.publish(
+      new RegisterEvent(email, username, verificationCode),
+    );
   }
 }
