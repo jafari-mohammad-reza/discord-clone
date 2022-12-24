@@ -1,7 +1,8 @@
-import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString } from 'class-validator';
+import { ApiProperty, PickType } from '@nestjs/swagger';
+import { User } from '../../core/classTypes/User';
 
-export class LoginDto {
+export class LoginDto extends PickType(User, ['password']) {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
@@ -11,15 +12,4 @@ export class LoginDto {
     description: 'your username or password',
   })
   identifier: string; // email or username
-  @IsString()
-  @Matches(/^.*(?=.{6,})(?=.*[a-zA-Z])(?=.*\d)(?=.*[!&$%? "]).*$/)
-  @Length(8, 16)
-  @ApiProperty({
-    type: 'string',
-    required: true,
-    minLength: 8,
-    maxLength: 16,
-    name: 'password',
-  })
-  password: string;
 }

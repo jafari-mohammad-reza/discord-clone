@@ -1,13 +1,14 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { VerifyAccountCommand } from '../impl/verify-account.command';
-import { PrismaService } from '../../../prisma.service';
+import { PrismaService } from '../../../core/prisma.service';
 import { NotFoundException } from '@nestjs/common';
 
 @CommandHandler(VerifyAccountCommand)
-export class VerifyAccountCommandHandler
+export class VerifyAccountHandler
   implements ICommandHandler<VerifyAccountCommand>
 {
   constructor(private readonly prismaService: PrismaService) {}
+
   async execute(command: VerifyAccountCommand): Promise<void> {
     const { code } = command;
     const user = await this.prismaService.user.findFirst({

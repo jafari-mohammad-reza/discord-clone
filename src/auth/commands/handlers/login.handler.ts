@@ -1,20 +1,18 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { LoginCommand } from '../impl/login.command';
-import { publish } from 'rxjs';
-import { PrismaService } from '../../../prisma.service';
-import { Prisma } from '@prisma/client';
+import { PrismaService } from '../../../core/prisma.service';
 import { compare } from 'bcrypt';
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
-import * as events from 'events';
 import { InvalidIpEvent } from '../../events/impl/invalid-ip.event';
 import { LoginEvent } from '../../events/impl/login.event';
 
 @CommandHandler(LoginCommand)
-export class LoginCommandHandler implements ICommandHandler<LoginCommand> {
+export class LoginHandler implements ICommandHandler<LoginCommand> {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly eventBus: EventBus,
   ) {}
+
   async execute(command: LoginCommand): Promise<string> {
     const { identifier, password, ip } = command;
     const {
@@ -48,6 +46,7 @@ export class LoginCommandHandler implements ICommandHandler<LoginCommand> {
     this.eventBus.publish(new LoginEvent(email));
     return email;
   }
+
   private async validateUserInfo(
     email: string,
     IsVerified: boolean,

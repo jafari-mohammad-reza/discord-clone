@@ -1,17 +1,16 @@
-import { PrismaService } from '../../../prisma.service';
+import { PrismaService } from '../../../core/prisma.service';
 import { RegisterCommand } from '../impl/register.command';
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { BadRequestException } from '@nestjs/common';
 import { RegisterEvent } from '../../events/impl/register.event';
-import { Prisma, PrismaClient } from '@prisma/client';
+
 @CommandHandler(RegisterCommand)
-export class RegisterCommandHandler
-  implements ICommandHandler<RegisterCommand>
-{
+export class RegisterHandler implements ICommandHandler<RegisterCommand> {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly eventBus: EventBus,
   ) {}
+
   async execute(command: RegisterCommand): Promise<void> {
     const { username, email, password } = command;
     const existUser = await this.prismaService.user.findFirst({

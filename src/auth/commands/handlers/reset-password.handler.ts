@@ -1,11 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ResetPasswordCommand } from '../impl/reset-password.command';
-import { PrismaService } from '../../../prisma.service';
+import { PrismaService } from '../../../core/prisma.service';
 import { compare } from 'bcrypt';
 import { BadRequestException } from '@nestjs/common';
 
 @CommandHandler(ResetPasswordCommand)
-export class ResetPasswordCommandHandler
+export class ResetPasswordHandler
   implements ICommandHandler<ResetPasswordCommand>
 {
   constructor(private readonly prismaService: PrismaService) {}

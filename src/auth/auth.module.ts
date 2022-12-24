@@ -1,28 +1,27 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { AuthController } from './auth.controller';
-import { RegisterCommandHandler } from './commands/handlers/register-command.handler';
+import { RegisterHandler } from './commands/handlers/register.handler';
 import { RegisterEventHandler } from './events/handlers/register-event.handler';
-import { PrismaService } from '../prisma.service';
-import { LoginCommandHandler } from './commands/handlers/login-command.handler';
+import { PrismaService } from '../core/prisma.service';
+import { LoginHandler } from './commands/handlers/login.handler';
 import { LoginEventHandler } from './events/handlers/login-event.handler';
-import { JwtModule, JwtService } from '@nestjs/jwt';
-import { VerifyAccountCommandHandler } from './commands/handlers/verify-account-command.handler';
-import { SendForgotPasswordCommandHandler } from './commands/handlers/send-forgotPassword-command.handler';
-import { ResetPasswordCommandHandler } from './commands/handlers/reset-password-command.handler';
+import { VerifyAccountHandler } from './commands/handlers/verify-account.handler';
+import { SendForgotPasswordHandler } from './commands/handlers/send-forgotPassword.handler';
+import { ResetPasswordHandler } from './commands/handlers/reset-password.handler';
 import { SendForgotPasswordEventHandler } from './events/handlers/send-forgotPassword-event.handler';
 import { MailService } from '../mail/mail.service';
-import { InvalidIpEvent } from './events/impl/invalid-ip.event';
-import { ValidateIpCommandHandler } from './commands/handlers/validate-ip-command.handler';
+import { ValidateIpHandler } from './commands/handlers/validate-ip.handler';
 import { InvalidIpEventHandler } from './events/handlers/invalid-ip-event.handler';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CoreModule } from '../core/core.module';
+
 const CommandHandlers = [
-  RegisterCommandHandler,
-  LoginCommandHandler,
-  VerifyAccountCommandHandler,
-  SendForgotPasswordCommandHandler,
-  ResetPasswordCommandHandler,
-  ValidateIpCommandHandler,
+  RegisterHandler,
+  LoginHandler,
+  VerifyAccountHandler,
+  SendForgotPasswordHandler,
+  ResetPasswordHandler,
+  ValidateIpHandler,
 ];
 const EventHandlers = [
   RegisterEventHandler,
@@ -30,17 +29,9 @@ const EventHandlers = [
   SendForgotPasswordEventHandler,
   InvalidIpEventHandler,
 ];
+
 @Module({
-  imports: [
-    CqrsModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        secret: config.getOrThrow('JWT_SECRET'),
-      }),
-    }),
-  ],
+  imports: [CoreModule, CqrsModule],
   controllers: [AuthController],
   providers: [...CommandHandlers, ...EventHandlers, PrismaService, MailService],
 })

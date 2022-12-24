@@ -1,11 +1,11 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { SendForgotPasswordCommand } from '../impl/send-forgotPassword.command';
-import { PrismaService } from '../../../prisma.service';
-import { BadRequestException, MethodNotAllowedException } from '@nestjs/common';
+import { PrismaService } from '../../../core/prisma.service';
+import { MethodNotAllowedException } from '@nestjs/common';
 import { SendForgotPasswordEvent } from '../../events/impl/send-forgotPassword.event';
 
 @CommandHandler(SendForgotPasswordCommand)
-export class SendForgotPasswordCommandHandler
+export class SendForgotPasswordHandler
   implements ICommandHandler<SendForgotPasswordCommand>
 {
   constructor(

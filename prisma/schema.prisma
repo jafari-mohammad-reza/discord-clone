@@ -9,35 +9,44 @@ datasource db {
 }
 
 model User {
-  id                 String          @id @default(uuid())
-  email              String          @unique
-  username           String          @unique
-  password           String
-  friends            User[]          @relation("Friends")
-  friend             User?           @relation("Friends", references: [id], fields: [friendId], onDelete: SetNull)
-  friendId           String?
-  joinedChannels     Channel[]       @relation("JoinedChannels")
-  createdChannels    Channel[]       @relation("CreatedChannels")
-  UserOnChannel      UserOnChannel[]
-  messages           Message[]
-  VoiceRoom          VoiceRoom?      @relation(fields: [voiceRoomId], references: [id], onDelete: SetNull)
-  voiceRoomId        String?
-  IsVerified         Boolean         @default(false)
-  verificationCode   Int?
-  resetPasswordAttempt Int @default(0)
-  lastResetPasswordAttempt DateTime? @db.Timestamp()
-  lastLoginIpAddress String?
+  id                       String          @id @default(uuid())
+  email                    String          @unique
+  username                 String          @unique
+  password                 String
+  friends                  User[]          @relation("Friends")
+  friend                   User?           @relation("Friends", references: [id], fields: [friendId], onDelete: SetNull)
+  friendId                 String?
+  joinedChannels           Channel[]       @relation("JoinedChannels")
+  createdChannels          Channel[]       @relation("CreatedChannels")
+  UserOnChannel            UserOnChannel[]
+  messages                 Message[]
+  VoiceRoom                VoiceRoom?      @relation(fields: [voiceRoomId], references: [id], onDelete: SetNull)
+  voiceRoomId              String?
+  IsVerified               Boolean         @default(false)
+  verificationCode         Int?
+  resetPasswordAttempt     Int             @default(0)
+  lastResetPasswordAttempt DateTime?       @db.Timestamp()
+  lastLoginIpAddress       String?
 }
 
 model Channel {
-  id            String           @id @default(uuid())
-  members       User[]           @relation("JoinedChannels")
-  owner         User             @relation("CreatedChannels", fields: [ownerId], references: [id], onDelete: Cascade)
+  id            String          @id @default(uuid())
+  title         String          @unique
+  category      Category        @relation(fields: [categoryId], references: [id])
+  categoryId    String
+  members       User[]          @relation("JoinedChannels")
+  owner         User            @relation("CreatedChannels", fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId       String
   UserOnChannel UserOnChannel[]
   Topics        Topic[]
-  isPublic      Boolean          @default(true)
+  isPublic      Boolean         @default(true)
   roles         Role[]
+}
+
+model Category {
+  id       String    @id @default(uuid())
+  title    String    @unique
+  channels Channel[]
 }
 
 model Role {

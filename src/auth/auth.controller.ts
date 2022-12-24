@@ -7,13 +7,10 @@ import {
   Param,
   Post,
   Query,
-  Req,
   Res,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { RegisterCommand } from './commands/impl/register.command';
-import { RegisterCommandHandler } from './commands/handlers/register-command.handler';
-import { PrismaService } from '../prisma.service';
 import { RegisterDto } from './dtos/register.dto';
 import {
   ApiBody,
@@ -24,9 +21,8 @@ import {
 } from '@nestjs/swagger';
 import { LoginDto } from './dtos/login.dto';
 import { LoginCommand } from './commands/impl/login.command';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import * as process from 'process';
 import { VerifyAccountCommand } from './commands/impl/verify-account.command';
 import {
   ForgotPasswordDto,
@@ -34,7 +30,6 @@ import {
 } from './dtos/forgot-password.dto';
 import { SendForgotPasswordCommand } from './commands/impl/send-forgotPassword.command';
 import { ResetPasswordCommand } from './commands/impl/reset-password.command';
-import { executeSchedule } from 'rxjs/internal/util/executeSchedule';
 import { ValidateIpCommand } from './commands/impl/validate-ip.command';
 
 @Controller({
@@ -47,6 +42,7 @@ export class AuthController {
     private readonly commandBus: CommandBus,
     private readonly jwtService: JwtService,
   ) {}
+
   @Post('register')
   @ApiBody({ type: RegisterDto, required: true })
   @ApiConsumes('application/x-www-form-urlencoded')
@@ -60,6 +56,7 @@ export class AuthController {
       return `Some problem happened while registering err : ${err.message}`;
     }
   }
+
   @Post('login')
   @ApiBody({ type: LoginDto, required: true })
   @ApiConsumes('application/x-www-form-urlencoded')
@@ -76,15 +73,17 @@ export class AuthController {
         { email },
         { expiresIn: Date.now() + 1200 },
       );
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: true,
-      });
-      return 'Logged in successfully.';
+      res
+        .cookie('token', token, {
+          httpOnly: true,
+          secure: true,
+        })
+        .send('Logged in successfully.');
     } catch (err) {
       return `Some problem happened while login err : ${err.message}`;
     }
   }
+
   @Post('verify/:code')
   @ApiParam({ type: 'string', required: true, name: 'code' })
   public async verifyAccount(@Param('code') code: string) {
@@ -97,6 +96,7 @@ export class AuthController {
       return `Some problem happened while verifying account err : ${err.message}`;
     }
   }
+
   @Post('forgot-password')
   @ApiBody({ type: SendForgotPasswordDto, required: true })
   @ApiConsumes('application/x-www-form-urlencoded')
@@ -108,6 +108,7 @@ export class AuthController {
       return `Some problem happened while verifying account err : ${err.message}`;
     }
   }
+
   @Post('reset-password')
   @ApiBody({ type: ForgotPasswordDto, required: true })
   @ApiQuery({ type: 'string', required: true, name: 'token' })
@@ -124,6 +125,7 @@ export class AuthController {
       return `Some problem happened while verifying account err : ${err.message}`;
     }
   }
+
   @Get('validate-ip/:token')
   @ApiParam({ type: 'string', required: true, name: 'token' })
   public async validateIp(@Param('token') token: string, @Ip() userIp: string) {
