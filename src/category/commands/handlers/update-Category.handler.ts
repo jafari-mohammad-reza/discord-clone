@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UpdateCategoryCommand } from '../impl/update-category.command';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma.service';
-import { AlreadyExistException } from '../../../exceptions/already-exist.exception';
+import { AlreadyExistException } from '../../../core/exceptions/already-exist.exception';
 
 @CommandHandler(UpdateCategoryCommand)
 export class UpdateCategoryHandler

@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CategoryController } from './category.controller';
 import { CqrsModule } from '@nestjs/cqrs';
-import { PrismaService } from '../core/prisma.service';
-import { MailService } from '../mail/mail.service';
 import { CreateCategoryHandler } from './commands/handlers/create-category.handler';
 import { UpdateCategoryHandler } from './commands/handlers/update-Category.handler';
 import { DeleteCategoryHandler } from './commands/handlers/delete-category.handler';

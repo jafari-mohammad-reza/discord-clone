@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -22,17 +23,20 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateCategoryCommand } from './commands/impl/create-category.command';
 import { DeleteCategoryCommand } from './commands/impl/delete-category.command';
 import { UpdateCategoryDto } from './dtos/update-category.dto';
-import { CreateCategoryHandler } from './commands/handlers/create-category.handler';
 import { GetCategoriesQuery } from './queries/impl/get-categories.query';
 import { GetCategoryQuery } from './queries/impl/get-category.query';
 
-@Controller('category')
+@Controller({
+  path: 'categories',
+  version: '1',
+})
 @ApiTags('Category')
 export class CategoryController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
+
   @Get()
   @ApiQuery({ type: String, required: false, name: 'page' })
   @ApiQuery({ type: String, required: false, name: 'take' })
@@ -48,6 +52,7 @@ export class CategoryController {
       return err.message;
     }
   }
+
   @Get(':id')
   @ApiParam({ type: String, required: true, name: 'id' })
   async getCategory(@Param('id') id: string) {
@@ -57,6 +62,7 @@ export class CategoryController {
       return err.message;
     }
   }
+
   @Post()
   @ApiConsumes('application/x-www-form-urlencoded')
   @ApiBody({ type: CreateCategoryDto, required: true })

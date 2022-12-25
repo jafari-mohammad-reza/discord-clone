@@ -1,11 +1,8 @@
-import { EventBus, EventsHandler, IEventHandler } from '@nestjs/cqrs';
+import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import { DeleteCategoryEvent } from '../impl/delete-category.event';
 import { PrismaService } from '../../../core/prisma.service';
 import { MailService } from '../../../mail/mail.service';
-import {
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { InternalServerErrorException } from '@nestjs/common';
 
 @EventsHandler(DeleteCategoryEvent)
 export class DeleteCategoryEventHandler
@@ -15,6 +12,7 @@ export class DeleteCategoryEventHandler
     private readonly prismaService: PrismaService,
     private readonly mailService: MailService,
   ) {}
+
   handle(event: DeleteCategoryEvent): void {
     try {
       const { categoryId } = event;
