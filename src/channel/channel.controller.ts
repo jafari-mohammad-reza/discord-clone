@@ -3,17 +3,25 @@ import {
   Controller,
   Delete,
   FileTypeValidator,
+  Get,
   MaxFileSizeValidator,
   Param,
   ParseFilePipe,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBody, ApiConsumes, ApiParam, ApiTags } from '@nestjs/swagger';
-import { CommandBus } from '@nestjs/cqrs';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateChannelDto } from './dtos/create-channel.dto';
 import { AuthUser } from '../auth/auth-user.decorator';
 import { User } from '@prisma/client/generated';
@@ -24,6 +32,7 @@ import { ValidOwnerGuard } from './valid-owner.guard';
 import * as string_decoder from 'string_decoder';
 import { UpdateChannelCommand } from './commands/impl/update-channel.command';
 import { DeleteChannelCommand } from './commands/impl/delete-channel.command';
+import { GetChannelQuery } from './queries/impl/get-channel.query';
 
 @Controller({
   path: 'channels',
@@ -31,8 +40,15 @@ import { DeleteChannelCommand } from './commands/impl/delete-channel.command';
 })
 @ApiTags('Channel')
 export class ChannelController {
-  constructor(private readonly commandBus: CommandBus) {}
-
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
+  @Get()
+  @ApiQuery({ type: String, name: 'identifier', required: true })
+  async getChannels(@Query('identifier') identifier: string) {
+    return this.queryBus.execute(new GetChannelQuery(identifier));
+  }
   @Post()
   @ApiBody({ type: CreateChannelDto, required: true })
   @ApiConsumes('multipart/form-data')

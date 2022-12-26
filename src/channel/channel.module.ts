@@ -12,6 +12,9 @@ import { CreateChannelEventHandler } from './events/handlers/create-channel-even
 import { DeleteChannelEventHandler } from './events/handlers/delete-channel-event.handler';
 import { UpdateChannelEvent } from './events/impl/update-channel.event';
 import { UpdateChannelEventHandler } from './events/handlers/update-channel-event.handler';
+import { SearchModule } from '../search/search.module';
+import { GetChannelQuery } from './queries/impl/get-channel.query';
+import { GetChannelHandler } from './queries/handlers/get-channel.handler';
 const CommandHandlers = [
   CreateChannelHandler,
   UpdateChannelHandler,
@@ -22,9 +25,23 @@ const EventHandlers = [
   UpdateChannelEventHandler,
   DeleteChannelEventHandler,
 ];
+const QueryHandlers = [GetChannelQuery];
 @Module({
-  imports: [CoreModule, CqrsModule],
+  imports: [
+    CoreModule,
+    CqrsModule,
+    SearchModule.registerAsync({
+      useFactory: async () => ({
+        index: 'channel',
+      }),
+    }),
+  ],
   controllers: [ChannelController],
-  providers: [...CommandHandlers, ...EventHandlers, ValidOwnerGuard],
+  providers: [
+    ...CommandHandlers,
+    GetChannelHandler,
+    ...EventHandlers,
+    ValidOwnerGuard,
+  ],
 })
 export class ChannelModule {}

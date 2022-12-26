@@ -16,12 +16,12 @@ import { TopicModule } from './topic/topic.module';
 import { CategoryModule } from './category/category.module';
 import { AuthMiddleware } from './auth/auth.middleware';
 import { DropBoxModule } from './drop-box/drop-box.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     CoreModule,
-
     AuthModule,
     UserModule,
     ChannelModule,
