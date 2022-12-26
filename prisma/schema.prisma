@@ -30,19 +30,21 @@ model User {
 }
 
 model Channel {
-  id            String          @id @default(uuid())
-  title         String          @unique
-  category      Category        @relation(fields: [categoryId], references: [id])
-  categoryId    String
-  members       User[]          @relation("JoinedChannels")
-  owner         User            @relation("CreatedChannels", fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId       String
-  UserOnChannel UserOnChannel[]
-  Topics        Topic[]
-  isPublic      Boolean         @default(true)
-  roles         Role[]
-  logo String @default("https://linkshortner.net/wsIbg")
+  id             String          @id @default(uuid())
+  title          String          @unique
+  category       Category        @relation(fields: [categoryId], references: [id])
+  categoryId     String
+  members        User[]          @relation("JoinedChannels")
+  owner          User            @relation("CreatedChannels", fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId        String
+  UserOnChannel  UserOnChannel[]
+  Topics         Topic[]
+  isPublic       Boolean         @default(true)
+  roles          Role[]
+  logo           String          @default("https://linkshortner.net/wsIbg")
+
 }
+
 
 model Category {
   id       String    @id @default(uuid())
