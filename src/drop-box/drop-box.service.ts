@@ -29,10 +29,15 @@ export class DropBoxService {
         );
       });
   }
-  async replaceImage(fileRev: string, filePath: string) {
-    await this.dropBox.filesPermanentlyDelete({
-      path: filePath,
-      parent_rev: fileRev,
-    });
+
+  deleteImage(fileRev: string, filePath: string) {
+    this.dropBox
+      .filesDeleteV2({
+        path: filePath,
+        parent_rev: fileRev,
+      })
+      .catch((err) => {
+        throw new InternalServerErrorException(err);
+      });
   }
 }

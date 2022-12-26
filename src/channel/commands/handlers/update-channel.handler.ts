@@ -1,10 +1,11 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { UpdateChannelCommand } from '../impl/update-channel.command';
 import { UpdateChannelDto } from '../../dtos/update-channel.dto';
 import { AlreadyExistException } from '../../../core/exceptions/already-exist.exception';
 import { NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma.service';
 import { DropBoxService } from '../../../drop-box/drop-box.service';
+import { UpdateChannelEvent } from '../../events/impl/update-channel.event';
 
 @CommandHandler(UpdateChannelCommand)
 export class UpdateChannelHandler
@@ -12,7 +13,7 @@ export class UpdateChannelHandler
 {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly dropBoxService: DropBoxService,
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute(command: UpdateChannelCommand): Promise<void> {
@@ -32,12 +33,10 @@ export class UpdateChannelHandler
       });
       if (!category) throw new NotFoundException();
     }
-    // if (file) {
-    //   this.dropBoxService.
-    // }
-    await this.prismaService.channel.update({
+    const updatedChannel = await this.prismaService.channel.update({
       where: { id },
       data: { title, categoryId, isPublic: Boolean(isPublic) },
     });
+    this.eventBus.publish(new UpdateChannelEvent(updatedChannel, file));
   }
 }

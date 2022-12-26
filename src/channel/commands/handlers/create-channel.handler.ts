@@ -1,4 +1,4 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { CreateChannelCommand } from '../impl/create-channel.command';
 import { PrismaService } from '../../../core/prisma.service';
 import { AlreadyExistException } from '../../../core/exceptions/already-exist.exception';
@@ -7,6 +7,7 @@ import { DropBoxService } from '../../../drop-box/drop-box.service';
 import * as path from 'path';
 import { DropboxResponse, files } from 'dropbox';
 import FileMetadata = files.FileMetadata;
+import { CreateChannelEvent } from '../../events/impl/create-channel.event';
 
 @CommandHandler(CreateChannelCommand)
 export class CreateChannelHandler
@@ -14,7 +15,7 @@ export class CreateChannelHandler
 {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly dropBoxService: DropBoxService,
+    private readonly eventBus: EventBus,
   ) {}
   async execute(command: CreateChannelCommand): Promise<void> {
     const { title, categoryId, file, isPublic } = command.createChannelDto;
@@ -29,23 +30,9 @@ export class CreateChannelHandler
       where: { id: categoryId },
     });
     if (!category) throw new NotFoundException();
-    // this.dropBoxService
-    //   .uploadImage(
-    //     file,
-    //     `/channels/logo/${title.replace(' ', '-')}${path.extname(
-    //       file.originalname,
-    //     )}`,
-    //   )
-    //   .then((response: DropboxResponse<FileMetadata>) => {
-    //     if (response.status === 200) {
-    //       this.prismaService.channel.update({
-    //         where: { title },
-    //         data: { logo: response.result.rev },
-    //       });
-    //     }
-    //   });
-    await this.prismaService.channel.create({
+    const createdChannel = await this.prismaService.channel.create({
       data: { title, categoryId, ownerId, isPublic: Boolean(isPublic) },
     });
+    return this.eventBus.publish(new CreateChannelEvent(createdChannel, file));
   }
 }

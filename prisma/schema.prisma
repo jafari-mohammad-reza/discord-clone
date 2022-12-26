@@ -42,6 +42,7 @@ model Channel {
   isPublic       Boolean         @default(true)
   roles          Role[]
   logo           String          @default("https://linkshortner.net/wsIbg")
+  logoPath           String?
 
 }
 
