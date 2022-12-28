@@ -10,6 +10,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -29,10 +30,12 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateChannelCommand } from './commands/impl/create-channel.command';
 import { UpdateChannelDto } from './dtos/update-channel.dto';
 import { ValidOwnerGuard } from './valid-owner.guard';
-import * as string_decoder from 'string_decoder';
 import { UpdateChannelCommand } from './commands/impl/update-channel.command';
 import { DeleteChannelCommand } from './commands/impl/delete-channel.command';
 import { GetChannelQuery } from './queries/impl/get-channel.query';
+import { JoinChannelCommand } from './commands/impl/join-channel.command';
+import { LeaveChannelCommand } from './commands/impl/leave-channel.command';
+import { KickFromChannelCommand } from './commands/impl/kick-from-channel.command';
 
 @Controller({
   path: 'channels',
@@ -44,11 +47,13 @@ export class ChannelController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
+
   @Get()
-  @ApiQuery({ type: String, name: 'identifier', required: true })
-  async getChannels(@Query('identifier') identifier: string) {
+  @ApiQuery({ type: String, name: 'identifier', required: false })
+  async getChannels(@Query('identifier') identifier?: string) {
     return this.queryBus.execute(new GetChannelQuery(identifier));
   }
+
   @Post()
   @ApiBody({ type: CreateChannelDto, required: true })
   @ApiConsumes('multipart/form-data')
@@ -76,7 +81,55 @@ export class ChannelController {
       return err.message;
     }
   }
-
+  @Post('join/:id')
+  @ApiParam({
+    type: String,
+    required: true,
+    name: 'id',
+    description: 'channel id',
+  })
+  async joinToChannel(@Param('id') id: string, @AuthUser() user: User) {
+    try {
+      return await this.commandBus.execute(new JoinChannelCommand(id, user));
+    } catch (err) {
+      return err.message;
+    }
+  }
+  @Post('leave/:id')
+  @ApiParam({
+    type: String,
+    required: true,
+    name: 'id',
+    description: 'channel id',
+  })
+  async leaveChannel(@Param('id') id: string, @AuthUser() user: User) {
+    try {
+      return await this.commandBus.execute(new LeaveChannelCommand(id, user));
+    } catch (err) {
+      return err.message;
+    }
+  }
+  @Post('kick/:userId')
+  @UseGuards(ValidOwnerGuard)
+  @ApiParam({
+    type: String,
+    required: true,
+    name: 'userId',
+    description: 'user id',
+  })
+  @ApiQuery({ type: String, required: true, name: 'channelId' })
+  async kickUserFromChannel(
+    @Param('userId') id: string,
+    @Query('channelId') channelId: string,
+  ) {
+    try {
+      return await this.commandBus.execute(
+        new KickFromChannelCommand(id, channelId),
+      );
+    } catch (err) {
+      return err.message;
+    }
+  }
   @Patch(':id')
   @ApiBody({ type: UpdateChannelDto, required: true })
   @ApiParam({ type: String, required: true, name: 'id' })

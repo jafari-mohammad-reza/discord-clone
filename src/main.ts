@@ -22,7 +22,11 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
   app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true ,transform:true}),
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
   );
   app.use(cookieParser());
   const config = new DocumentBuilder()

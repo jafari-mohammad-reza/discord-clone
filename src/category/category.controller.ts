@@ -8,7 +8,6 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -68,7 +67,6 @@ export class CategoryController {
   @ApiBody({ type: CreateCategoryDto, required: true })
   async createCategory(@Body() createCategoryDto: CreateCategoryDto) {
     try {
-      console.log('first');
       return await this.commandBus.execute(
         new CreateCategoryCommand(createCategoryDto),
       );

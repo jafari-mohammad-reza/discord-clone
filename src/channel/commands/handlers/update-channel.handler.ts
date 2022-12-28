@@ -1,10 +1,8 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { UpdateChannelCommand } from '../impl/update-channel.command';
-import { UpdateChannelDto } from '../../dtos/update-channel.dto';
 import { AlreadyExistException } from '../../../core/exceptions/already-exist.exception';
 import { NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma.service';
-import { DropBoxService } from '../../../drop-box/drop-box.service';
 import { UpdateChannelEvent } from '../../events/impl/update-channel.event';
 
 @CommandHandler(UpdateChannelCommand)

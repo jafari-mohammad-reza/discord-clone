@@ -1,7 +1,6 @@
 import {
   Injectable,
   NestMiddleware,
-  RequestMethod,
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from '../core/prisma.service';
@@ -14,6 +13,7 @@ export class AuthMiddleware implements NestMiddleware {
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
   ) {}
+
   async use(req: Request, res: Response, next: NextFunction): Promise<void> {
     const token: string =
       req.cookies['token'] ||
@@ -23,7 +23,7 @@ export class AuthMiddleware implements NestMiddleware {
     if (!email) throw new UnauthorizedException();
     const user = await this.prismaService.user.findUnique({
       where: { email },
-      select: { id:true},
+      select: { id: true },
     });
     if (!user) throw new UnauthorizedException();
     req['user'] = user;

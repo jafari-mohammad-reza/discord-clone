@@ -11,13 +11,17 @@ export class DeleteChannelHandler
     private readonly prismaService: PrismaService,
     private readonly eventBus: EventBus,
   ) {}
+
   async execute(command: DeleteChannelCommand): Promise<void> {
     const { id } = command;
-    const channel = await this.prismaService.channel.findFirstOrThrow({
+    const channel = await this.prismaService.channel.findUniqueOrThrow({
       where: { id },
+      include: { members: { select: { email: true } } },
     });
 
     await this.prismaService.channel.delete({ where: { id } });
-    return this.eventBus.publish(new DeleteChannelEvent(channel));
+    return this.eventBus.publish(
+      new DeleteChannelEvent(channel, channel.members),
+    );
   }
 }

@@ -1,5 +1,5 @@
 import { Channel as ChannelType } from '@prisma/client/generated';
-import { IsBoolean, IsNumber, IsString, IsUUID } from 'class-validator';
+import { IsBoolean, IsString, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 

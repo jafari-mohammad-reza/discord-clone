@@ -5,7 +5,6 @@ import {
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client/generated';
 
 @CommandHandler(CreateCategoryCommand)
 export class CreateCategoryHandler
