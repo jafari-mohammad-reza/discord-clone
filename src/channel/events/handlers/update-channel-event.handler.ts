@@ -4,9 +4,11 @@ import { PrismaService } from '../../../core/prisma.service';
 import { DropBoxService } from '../../../drop-box/drop-box.service';
 import * as path from 'path';
 import { DropboxResponse, files } from 'dropbox';
-import FileMetadata = files.FileMetadata;
 import { InternalServerErrorException } from '@nestjs/common';
 import { UpdateChannelEvent } from '../impl/update-channel.event';
+import FileMetadata = files.FileMetadata;
+import ReturnUploadPath from '../../../core/utils/returnUploadPath';
+import { SearchService } from '../../../search/search.service';
 
 @EventsHandler(UpdateChannelEvent)
 export class UpdateChannelEventHandler
@@ -15,27 +17,25 @@ export class UpdateChannelEventHandler
   constructor(
     private readonly prismaService: PrismaService,
     private readonly dropBoxService: DropBoxService,
+    private readonly searchService: SearchService,
   ) {}
+
   handle(event: UpdateChannelEvent): void {
     const { channel, file } = event;
     const { title } = channel;
     this.dropBoxService.deleteImage(channel.logo, channel.logoPath);
     this.dropBoxService
-      .uploadImage(
-        file,
-        `/channels/logo/${title.replace(' ', '-')}
-        ${Date.now()}
-        ${path.extname(file.originalname)}`,
-      )
+      .uploadImage(file, ReturnUploadPath('channel/logo', title, file))
       .then(async (response: DropboxResponse<FileMetadata>) => {
         if (response.status === 200) {
-          await this.prismaService.channel.update({
+          const updatedChannel = await this.prismaService.channel.update({
             where: { title },
             data: {
               logo: response.result.rev,
               logoPath: response.result.path_display,
             },
           });
+          await this.searchService.updateIndex(channel.id, channel);
         }
       })
       .catch((err) => {

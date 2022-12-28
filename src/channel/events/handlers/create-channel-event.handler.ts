@@ -1,11 +1,13 @@
-import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
+import { CommandBus, EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import { CreateChannelEvent } from '../impl/create-channel.event';
 import { PrismaService } from '../../../core/prisma.service';
 import { DropBoxService } from '../../../drop-box/drop-box.service';
 import * as path from 'path';
 import { DropboxResponse, files } from 'dropbox';
-import FileMetadata = files.FileMetadata;
 import { InternalServerErrorException } from '@nestjs/common';
+import FileMetadata = files.FileMetadata;
+import ReturnUploadPath from '../../../core/utils/returnUploadPath';
+import { SearchService } from '../../../search/search.service';
 
 @EventsHandler(CreateChannelEvent)
 export class CreateChannelEventHandler
@@ -14,30 +16,27 @@ export class CreateChannelEventHandler
   constructor(
     private readonly prismaService: PrismaService,
     private readonly dropBoxService: DropBoxService,
+    private readonly searchService: SearchService,
   ) {}
-  handle(event: CreateChannelEvent): void {
+
+  async handle(event: CreateChannelEvent): Promise<void> {
     const { channel, file } = event;
     const { title } = channel;
-    this.dropBoxService
-      .uploadImage(
-        file,
-        `/channels/logo/${title.replace(' ', '-')}       ${Date.now()}
-${path.extname(file.originalname)}`,
-      )
-      .then(async (response: DropboxResponse<FileMetadata>) => {
-        if (response.status === 200) {
-          await this.prismaService.channel.update({
-            where: { title },
-            data: {
-              logo: response.result.rev,
-              logoPath: response.result.path_display,
-            },
-          });
-        }
-      })
-      .catch((err) => {
-        throw new InternalServerErrorException(err);
+    const response = await this.dropBoxService.uploadImage(
+      file,
+      ReturnUploadPath('channel/logo', title, file),
+    );
+    if (response.status === 200) {
+      const newChannel = await this.prismaService.channel.update({
+        where: { title },
+        data: {
+          logo: response.result.rev,
+          logoPath: response.result.path_display,
+        },
       });
+      await this.searchService.addIndex(channel);
+    }
+
     // TODO add this channel to elastic search
   }
 }

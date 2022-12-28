@@ -1,19 +1,26 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
-import { ConfigService } from '@nestjs/config';
 import {
   SEARCH_SERVICE_INDEX,
   SearchModuleConfig,
 } from './search.module-defenition';
 import {
-  IndexResponse,
   IndicesExistsResponse,
-  IndicesGetResponse,
+  QueryDslQueryContainer,
+  QueryDslQueryStringQuery,
+  SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import parseIndexDocument from '../core/utils/parseIndexDocument';
 
 @Injectable()
 export class SearchService {
   private indic;
+
   constructor(
     private readonly elasticSearchService: ElasticsearchService,
     @Inject(SEARCH_SERVICE_INDEX)
@@ -30,14 +37,65 @@ export class SearchService {
         }
       });
   }
-  async search(identifier: string) {
-    return await this.elasticSearchService.search({
-      index: this.entityIndex.index,
-      query: {
-        multi_match: {
-          query: identifier,
-        },
+
+  async search(identifier?: string) {
+    const query: QueryDslQueryContainer = identifier && {
+      multi_match: {
+        query: identifier || '',
       },
-    });
+    };
+    const params: SearchRequest = {
+      index: this.entityIndex.index,
+      query,
+      pretty: true,
+      request_cache: true,
+    };
+    return await this.elasticSearchService.search(params, {});
+  }
+  async addIndex(indexDocument: Object) {
+    try {
+      indexDocument = parseIndexDocument(indexDocument);
+      return await this.elasticSearchService.index({
+        index: this.entityIndex.index,
+        document: indexDocument,
+      });
+    } catch (err) {
+      return err;
+    }
+  }
+  async updateIndex(id: string, indexDocument: Object) {
+    try {
+      indexDocument = parseIndexDocument(indexDocument);
+      const existIndex = await this.elasticSearchService.search({
+        index: this.entityIndex.index,
+        query: {
+          match: {
+            id: id,
+          },
+        },
+      });
+      if (!existIndex) throw new NotFoundException();
+      return await this.elasticSearchService.update({
+        index: this.entityIndex.index,
+        id: existIndex.hits.hits[0]._id,
+        doc: indexDocument,
+      });
+    } catch (err) {
+      return err;
+    }
+  }
+  async removeIndex(id: string) {
+    try {
+      return await this.elasticSearchService.deleteByQuery({
+        index: this.entityIndex.index,
+        query: {
+          match: {
+            id: id.trim(),
+          },
+        },
+      });
+    } catch (err) {
+      return err;
+    }
   }
 }
