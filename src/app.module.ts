@@ -9,6 +9,8 @@ import { CoreModule } from './core/core.module';
 import { TopicModule } from './topic/topic.module';
 import { CategoryModule } from './category/category.module';
 import { AuthMiddleware } from './auth/auth.middleware';
+import { APP_FILTER } from '@nestjs/core';
+import { HttpExceptionFilter } from './core/http-exception.filter';
 
 @Module({
   imports: [
@@ -21,7 +23,12 @@ import { AuthMiddleware } from './auth/auth.middleware';
     CategoryModule,
     TopicModule,
   ],
-  controllers: [],
+  providers: [
+    // {
+    //   provide: APP_FILTER,
+    //   useClass: HttpExceptionFilter,
+    // },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {

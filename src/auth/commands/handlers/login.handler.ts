@@ -2,7 +2,11 @@ import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { LoginCommand } from '../impl/login.command';
 import { PrismaService } from '../../../core/prisma.service';
 import { compare } from 'bcrypt';
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InvalidIpEvent } from '../../events/impl/invalid-ip.event';
 import { LoginEvent } from '../../events/impl/login.event';
 
@@ -14,37 +18,46 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
   ) {}
 
   async execute(command: LoginCommand): Promise<string> {
-    const { identifier, password, ip } = command;
-    const {
-      email,
-      IsVerified,
-      password: userPassword,
-      lastLoginIpAddress,
-    } = await this.prismaService.user.findFirstOrThrow({
-      where: {
-        OR: [{ email: identifier }, { username: identifier }],
-      },
-      select: {
-        email: true,
-        IsVerified: true,
-        password: true,
-        lastLoginIpAddress: true,
-      },
-    });
-    await this.validateUserInfo(
-      email,
-      IsVerified,
-      password,
-      userPassword,
-      lastLoginIpAddress,
-      ip,
-    );
-    await this.prismaService.user.update({
-      where: { email },
-      data: { lastLoginIpAddress: ip },
-    });
-    this.eventBus.publish(new LoginEvent(email));
-    return email;
+    try {
+      const { identifier, password, ip } = command;
+      const user = await this.prismaService.user.findFirst({
+        where: {
+          OR: [{ email: identifier }, { username: identifier }],
+        },
+        select: {
+          email: true,
+          IsVerified: true,
+          password: true,
+          lastLoginIpAddress: true,
+        },
+      });
+      if (!user)
+        throw new NotFoundException(
+          'Please insert your credentials correctly.',
+        );
+      const {
+        email,
+        IsVerified,
+        password: userPassword,
+        lastLoginIpAddress,
+      } = user;
+      await this.validateUserInfo(
+        email,
+        IsVerified,
+        password,
+        userPassword,
+        lastLoginIpAddress,
+        ip,
+      );
+      await this.prismaService.user.update({
+        where: { email },
+        data: { lastLoginIpAddress: ip },
+      });
+      this.eventBus.publish(new LoginEvent(email));
+      return email;
+    } catch (err) {
+      return err.message;
+    }
   }
 
   private async validateUserInfo(

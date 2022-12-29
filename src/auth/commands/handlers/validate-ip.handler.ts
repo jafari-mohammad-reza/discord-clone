@@ -8,11 +8,15 @@ export class ValidateIpHandler implements ICommandHandler<ValidateIpCommand> {
   constructor(private readonly prismaService: PrismaService) {}
 
   async execute(command: ValidateIpCommand): Promise<void> {
-    const { email } = command;
-    this.prismaService.user
-      .update({ where: { email }, data: { lastLoginIpAddress: null } })
-      .catch((err) => {
-        throw new BadRequestException(err.message);
-      });
+    try {
+      const { email } = command;
+      this.prismaService.user
+        .update({ where: { email }, data: { lastLoginIpAddress: null } })
+        .catch((err) => {
+          throw new BadRequestException(err.message);
+        });
+    } catch (err) {
+      return err.message;
+    }
   }
 }

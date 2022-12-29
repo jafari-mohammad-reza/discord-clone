@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Get,
   Ip,
@@ -8,6 +9,7 @@ import {
   Post,
   Query,
   Res,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { RegisterCommand } from './commands/impl/register.command';
@@ -44,14 +46,14 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  @UseInterceptors(ClassSerializerInterceptor)
   @ApiBody({ type: RegisterDto, required: true })
   @ApiConsumes('application/x-www-form-urlencoded')
   public async register(@Body() { email, username, password }: RegisterDto) {
     try {
-      await this.commandBus.execute(
+      return await this.commandBus.execute(
         new RegisterCommand(email, username, password),
       );
-      return 'Success.';
     } catch (err) {
       return `Some problem happened while registering err : ${err.message}`;
     }
