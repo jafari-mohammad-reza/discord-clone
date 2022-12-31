@@ -6,7 +6,9 @@ import { User } from '../../../core/classTypes/User';
 import { PrismaService } from '../../../core/prisma.service';
 import {
   BadRequestException,
+  HttpException,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { hashSync } from 'bcrypt';
 
@@ -41,8 +43,10 @@ describe('Reset password handler', function () {
       password: 'Test1234$',
     };
     prisma.user.findUnique = jest.fn().mockResolvedValue(null);
-    const response = await resetPasswordHandler.execute(user);
-    expect(response).toBe('user not found');
+    await resetPasswordHandler.execute(user).catch((err: HttpException) => {
+      expect(err.message).toMatch('user not found');
+      expect(err).toBeInstanceOf(NotFoundException);
+    });
   });
   it('should reset password fail passwords are same', async function () {
     const user = {
@@ -52,7 +56,11 @@ describe('Reset password handler', function () {
     prisma.user.findUnique = jest
       .fn()
       .mockResolvedValue({ password: hashSync('Test1234$', 10) });
-    const response = await resetPasswordHandler.execute(user);
-    expect(response).toBe('New password must be different from previous one');
+    await resetPasswordHandler.execute(user).catch((err: HttpException) => {
+      expect(err.message).toMatch(
+        'New password must be different from previous one',
+      );
+      expect(err).toBeInstanceOf(BadRequestException);
+    });
   });
 });

@@ -4,6 +4,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { CoreModule } from '../../../core/core.module';
 import { hashSync } from 'bcrypt';
 import { VerifyAccountHandler } from '../handlers/verify-account.handler';
+import { HttpException, NotFoundException } from '@nestjs/common';
 
 let verifyAccountHandler: VerifyAccountHandler;
 let prisma: PrismaService;
@@ -30,7 +31,9 @@ describe('Reset password handler', function () {
     const code = 123456;
     prisma.user.findFirst = jest.fn().mockResolvedValue(null);
     prisma.user.update = jest.fn();
-    const response = await verifyAccountHandler.execute({ code });
-    expect(response).toMatch('There is no user with this code');
+    await verifyAccountHandler.execute({ code }).catch((err: HttpException) => {
+      expect(err.message).toMatch('There is no user with this code');
+      expect(err).toBeInstanceOf(NotFoundException);
+    });
   });
 });

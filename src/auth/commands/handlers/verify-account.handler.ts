@@ -10,18 +10,14 @@ export class VerifyAccountHandler
   constructor(private readonly prismaService: PrismaService) {}
 
   async execute(command: VerifyAccountCommand): Promise<void> {
-    try {
-      const { code } = command;
-      const user = await this.prismaService.user.findFirst({
-        where: { verificationCode: code },
-      });
-      if (!user) throw new NotFoundException('There is no user with this code');
-      await this.prismaService.user.update({
-        where: { id: user.id },
-        data: { IsVerified: true, verificationCode: null },
-      });
-    } catch (err) {
-      return err.message;
-    }
+    const { code } = command;
+    const user = await this.prismaService.user.findFirst({
+      where: { verificationCode: code },
+    });
+    if (!user) throw new NotFoundException('There is no user with this code');
+    await this.prismaService.user.update({
+      where: { id: user.id },
+      data: { IsVerified: true, verificationCode: null },
+    });
   }
 }

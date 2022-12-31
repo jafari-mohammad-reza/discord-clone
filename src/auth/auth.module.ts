@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import { AuthController } from './auth.controller';
 import { RegisterHandler } from './commands/handlers/register.handler';
 import { RegisterEventHandler } from './events/handlers/register-event.handler';
 import { PrismaService } from '../core/prisma.service';
@@ -14,6 +13,7 @@ import { MailService } from '../mail/mail.service';
 import { ValidateIpHandler } from './commands/handlers/validate-ip.handler';
 import { InvalidIpEventHandler } from './events/handlers/invalid-ip-event.handler';
 import { CoreModule } from '../core/core.module';
+import { AuthController } from './auth.controller';
 
 const CommandHandlers = [
   RegisterHandler,
@@ -33,6 +33,6 @@ const EventHandlers = [
 @Module({
   imports: [CoreModule, CqrsModule],
   controllers: [AuthController],
-  providers: [...CommandHandlers, ...EventHandlers, PrismaService, MailService],
+  providers: [...CommandHandlers, ...EventHandlers, MailService],
 })
 export class AuthModule {}

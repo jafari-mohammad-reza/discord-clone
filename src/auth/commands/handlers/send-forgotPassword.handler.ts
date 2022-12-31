@@ -14,30 +14,26 @@ export class SendForgotPasswordHandler
   ) {}
 
   async execute(command: SendForgotPasswordCommand): Promise<void> {
-    try {
-      const { email } = command;
-      const user = await this.prismaService.user.findUnique({
-        where: { email },
-        select: {
-          resetPasswordAttempt: true,
-          lastResetPasswordAttempt: true,
-        },
-      });
-      if (!user) throw new NotFoundException('user not found');
-      const { resetPasswordAttempt, lastResetPasswordAttempt } = user;
-      const currentDate = new Date();
-      if (
-        resetPasswordAttempt >= 3 ||
-        Number(lastResetPasswordAttempt) >
-          currentDate.setDate(currentDate.getDate() - 30)
-      ) {
-        throw new MethodNotAllowedException(
-          'You are not allowed to change your password',
-        );
-      }
-      this.eventBus.publish(new SendForgotPasswordEvent(email));
-    } catch (err) {
-      return err.message;
+    const { email } = command;
+    const user = await this.prismaService.user.findUnique({
+      where: { email },
+      select: {
+        resetPasswordAttempt: true,
+        lastResetPasswordAttempt: true,
+      },
+    });
+    if (!user) throw new NotFoundException('user not found');
+    const { resetPasswordAttempt, lastResetPasswordAttempt } = user;
+    const currentDate = new Date();
+    if (
+      resetPasswordAttempt >= 3 ||
+      Number(lastResetPasswordAttempt) >
+        currentDate.setDate(currentDate.getDate() - 30)
+    ) {
+      throw new MethodNotAllowedException(
+        'You are not allowed to change your password',
+      );
     }
+    this.eventBus.publish(new SendForgotPasswordEvent(email));
   }
 }

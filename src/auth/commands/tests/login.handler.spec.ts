@@ -6,9 +6,13 @@ import { User } from '../../../core/classTypes/User';
 import { PrismaService } from '../../../core/prisma.service';
 import {
   BadRequestException,
+  ForbiddenException,
+  HttpException,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { hashSync } from 'bcrypt';
+import { LoginCommand } from '../impl/login.command';
 
 let loginHandler: LoginHandler;
 let prisma: PrismaService;
@@ -48,8 +52,10 @@ describe('Login handler', function () {
     };
     prisma.user.findFirst = jest.fn().mockResolvedValue(null);
     prisma.user.update = jest.fn().mockResolvedValue({});
-    const response = await loginHandler.execute(user);
-    expect(response).toMatch('Please insert your credentials correctly.');
+    await loginHandler.execute(user).catch((err: HttpException) => {
+      expect(err.message).toMatch('Please insert your credentials correctly.');
+      expect(err).toBeInstanceOf(NotFoundException);
+    });
   });
   it('should fail wrong password', async function () {
     const user = {
@@ -64,8 +70,10 @@ describe('Login handler', function () {
       lastLoginIpAddress: '1.1.1.1',
     });
     prisma.user.update = jest.fn().mockResolvedValue({});
-    const response = await loginHandler.execute(user);
-    expect(response).toMatch('Please insert your credentials correctly.');
+    await loginHandler.execute(user).catch((err: HttpException) => {
+      expect(err.message).toMatch('Please insert your credentials correctly.');
+      expect(err).toBeInstanceOf(BadRequestException);
+    });
   });
 
   it('should fail account is not verified', async function () {
@@ -81,8 +89,10 @@ describe('Login handler', function () {
       lastLoginIpAddress: '1.1.1.1',
     });
     prisma.user.update = jest.fn().mockResolvedValue({});
-    const response = await loginHandler.execute(user);
-    expect(response).toMatch('Please verify your account first');
+    await loginHandler.execute(user).catch((err: HttpException) => {
+      expect(err.message).toMatch('Please verify your account first');
+      expect(err).toBeInstanceOf(BadRequestException);
+    });
   });
   it('should fail wrong ip', async function () {
     const user = {
@@ -97,9 +107,11 @@ describe('Login handler', function () {
       lastLoginIpAddress: '1.1.1.1',
     });
     prisma.user.update = jest.fn().mockResolvedValue({});
-    const response = await loginHandler.execute(user);
-    expect(response).toMatch(
-      'Please verify your self with the email we sent to you',
-    );
+    await loginHandler.execute(user).catch((err: HttpException) => {
+      expect(err.message).toMatch(
+        'Please verify your self with the email we sent to you',
+      );
+      expect(err).toBeInstanceOf(ForbiddenException);
+    });
   });
 });

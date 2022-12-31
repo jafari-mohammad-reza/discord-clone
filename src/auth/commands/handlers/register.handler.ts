@@ -14,25 +14,18 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
   ) {}
 
   async execute(command: RegisterCommand): Promise<Object> {
-    try {
-      const { username, email, password } = command;
-      const existUser = await this.prismaService.user.findFirst({
-        where: {
-          OR: [{ email }, { username }],
-        },
-      });
-      if (existUser)
-        throw new BadRequestException('Invalid username or email.');
-      const verificationCode = Math.floor(100000 + Math.random() * 900000);
-      await this.prismaService.user.create({
-        data: { email, username, password, verificationCode: verificationCode },
-      });
-      this.eventBus.publish(
-        new RegisterEvent(email, username, verificationCode),
-      );
-      return { username, email, password };
-    } catch (err) {
-      return err.message;
-    }
+    const { username, email, password } = command;
+    const existUser = await this.prismaService.user.findFirst({
+      where: {
+        OR: [{ email }, { username }],
+      },
+    });
+    if (existUser) throw new BadRequestException('Invalid username or email.');
+    const verificationCode = Math.floor(100000 + Math.random() * 900000);
+    await this.prismaService.user.create({
+      data: { email, username, password, verificationCode: verificationCode },
+    });
+    this.eventBus.publish(new RegisterEvent(email, username, verificationCode));
+    return { username, email, password };
   }
 }

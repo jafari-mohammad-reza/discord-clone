@@ -6,6 +6,7 @@ import { User } from '../../../core/classTypes/User';
 import { PrismaService } from '../../../core/prisma.service';
 import {
   BadRequestException,
+  HttpException,
   InternalServerErrorException,
 } from '@nestjs/common';
 
@@ -42,7 +43,9 @@ describe('Register handler', function () {
     };
     prisma.user.findFirst = jest.fn().mockResolvedValue({});
     prisma.user.create = jest.fn().mockResolvedValue(user);
-    const response = await registerHandler.execute(user);
-    expect(response).toBe('Invalid username or email.');
+    await registerHandler.execute(user).catch((err: HttpException) => {
+      expect(err.message).toMatch('Invalid username or email.');
+      expect(err).toBeInstanceOf(BadRequestException);
+    });
   });
 });

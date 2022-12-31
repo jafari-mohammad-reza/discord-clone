@@ -18,46 +18,40 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
   ) {}
 
   async execute(command: LoginCommand): Promise<string> {
-    try {
-      const { identifier, password, ip } = command;
-      const user = await this.prismaService.user.findFirst({
-        where: {
-          OR: [{ email: identifier }, { username: identifier }],
-        },
-        select: {
-          email: true,
-          IsVerified: true,
-          password: true,
-          lastLoginIpAddress: true,
-        },
-      });
-      if (!user)
-        throw new NotFoundException(
-          'Please insert your credentials correctly.',
-        );
-      const {
-        email,
-        IsVerified,
-        password: userPassword,
-        lastLoginIpAddress,
-      } = user;
-      await this.validateUserInfo(
-        email,
-        IsVerified,
-        password,
-        userPassword,
-        lastLoginIpAddress,
-        ip,
-      );
-      await this.prismaService.user.update({
-        where: { email },
-        data: { lastLoginIpAddress: ip },
-      });
-      this.eventBus.publish(new LoginEvent(email));
-      return email;
-    } catch (err) {
-      return err.message;
-    }
+    const { identifier, password, ip } = command;
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        OR: [{ email: identifier }, { username: identifier }],
+      },
+      select: {
+        email: true,
+        IsVerified: true,
+        password: true,
+        lastLoginIpAddress: true,
+      },
+    });
+    if (!user)
+      throw new NotFoundException('Please insert your credentials correctly.');
+    const {
+      email,
+      IsVerified,
+      password: userPassword,
+      lastLoginIpAddress,
+    } = user;
+    await this.validateUserInfo(
+      email,
+      IsVerified,
+      password,
+      userPassword,
+      lastLoginIpAddress,
+      ip,
+    );
+    await this.prismaService.user.update({
+      where: { email },
+      data: { lastLoginIpAddress: ip },
+    });
+    this.eventBus.publish(new LoginEvent(email));
+    return email;
   }
 
   private async validateUserInfo(

@@ -10,6 +10,10 @@ import { HttpExceptionFilter } from './http-exception.filter';
 @Module({
   imports: [
     {
+      ...ConfigModule.forRoot({ isGlobal: true }),
+      global: true,
+    },
+    {
       ...JwtModule.registerAsync({
         imports: [ConfigModule],
         inject: [ConfigService],

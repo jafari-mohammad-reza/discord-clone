@@ -4,6 +4,9 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  HttpCode,
+  HttpException,
+  HttpStatus,
   Ip,
   Param,
   Post,
@@ -33,6 +36,7 @@ import {
 import { SendForgotPasswordCommand } from './commands/impl/send-forgotPassword.command';
 import { ResetPasswordCommand } from './commands/impl/reset-password.command';
 import { ValidateIpCommand } from './commands/impl/validate-ip.command';
+import { isJWT, IsJWT } from 'class-validator';
 
 @Controller({
   version: '1',
@@ -46,20 +50,17 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  @UseInterceptors(ClassSerializerInterceptor)
+  @HttpCode(201)
   @ApiBody({ type: RegisterDto, required: true })
   @ApiConsumes('application/x-www-form-urlencoded')
   public async register(@Body() { email, username, password }: RegisterDto) {
-    try {
-      return await this.commandBus.execute(
-        new RegisterCommand(email, username, password),
-      );
-    } catch (err) {
-      return `Some problem happened while registering err : ${err.message}`;
-    }
+    return await this.commandBus.execute(
+      new RegisterCommand(email, username, password),
+    );
   }
 
   @Post('login')
+  @HttpCode(200)
   @ApiBody({ type: LoginDto, required: true })
   @ApiConsumes('application/x-www-form-urlencoded')
   public async login(
@@ -67,51 +68,42 @@ export class AuthController {
     @Ip() ip: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    try {
-      const email = await this.commandBus.execute(
-        new LoginCommand(identifier, password, ip.split('f:')[1]),
-      );
-      const token = await this.jwtService.signAsync(
-        { email },
-        { expiresIn: Date.now() + 1200 },
-      );
-      res
-        .cookie('token', token, {
-          httpOnly: true,
-          secure: true,
-        })
-        .send('Logged in successfully.');
-    } catch (err) {
-      return `Some problem happened while login err : ${err.message}`;
-    }
+    const email = await this.commandBus.execute(
+      new LoginCommand(identifier, password, ip.split('f:')[1]),
+    );
+    const token = await this.jwtService.signAsync(
+      { email },
+      { expiresIn: Date.now() + 1200 },
+    );
+    res
+      .cookie('token', token, {
+        httpOnly: true,
+        secure: true,
+      })
+      .send('Logged in successfully.');
   }
 
   @Post('verify/:code')
+  @HttpCode(200)
   @ApiParam({ type: 'string', required: true, name: 'code' })
   public async verifyAccount(@Param('code') code: string) {
-    try {
-      if (code.length - 1 !== 6)
-        throw new BadRequestException('Code must be 6 digits');
-      await this.commandBus.execute(new VerifyAccountCommand(+code));
-      return 'Success.';
-    } catch (err) {
-      return `Some problem happened while verifying account err : ${err.message}`;
-    }
+    if (code.length !== 6)
+      throw new BadRequestException('Code must be 6 digits');
+    await this.commandBus.execute(new VerifyAccountCommand(+code));
+    return 'Success.';
   }
 
   @Post('forgot-password')
+  @HttpCode(200)
   @ApiBody({ type: SendForgotPasswordDto, required: true })
   @ApiConsumes('application/x-www-form-urlencoded')
   public async forgotPassword(@Body() { email }: SendForgotPasswordDto) {
-    try {
-      await this.commandBus.execute(new SendForgotPasswordCommand(email));
-      return 'Success.';
-    } catch (err) {
-      return `Some problem happened while verifying account err : ${err.message}`;
-    }
+    await this.commandBus.execute(new SendForgotPasswordCommand(email));
+    return 'Success.';
   }
 
   @Post('reset-password')
+  @HttpCode(200)
   @ApiBody({ type: ForgotPasswordDto, required: true })
   @ApiQuery({ type: 'string', required: true, name: 'token' })
   @ApiConsumes('application/x-www-form-urlencoded')
@@ -119,28 +111,29 @@ export class AuthController {
     @Body() { password }: ForgotPasswordDto,
     @Query('token') token: string,
   ) {
-    try {
-      const { email } = await this.jwtService.verifyAsync(token, {});
-      await this.commandBus.execute(new ResetPasswordCommand(email, password));
-      return 'Success.';
-    } catch (err) {
-      return `Some problem happened while verifying account err : ${err.message}`;
-    }
+    if (isJWT(token))
+      throw new BadRequestException('please insert a valid jwt token');
+    const { email } = await this.jwtService
+      .verifyAsync(token, {})
+      .catch((err) => {
+        throw new BadRequestException(
+          err.message === 'jwt malformed' ? 'Invalid token' : err.message,
+        );
+      });
+    await this.commandBus.execute(new ResetPasswordCommand(email, password));
+    return 'Success.';
   }
 
   @Get('validate-ip/:token')
+  @HttpCode(200)
   @ApiParam({ type: 'string', required: true, name: 'token' })
   public async validateIp(@Param('token') token: string, @Ip() userIp: string) {
-    try {
-      const { email, ip } = await this.jwtService.verifyAsync(token);
-      if (userIp.split('f:')[1] !== ip) {
-        throw new BadRequestException('Invalid ip address');
-      } else {
-        await this.commandBus.execute(new ValidateIpCommand(email));
-        return 'Ok';
-      }
-    } catch (err) {
-      return `Some problem happened while validating ip  err : ${err.message}`;
+    const { email, ip } = await this.jwtService.verifyAsync(token);
+    if (userIp.split('f:')[1] !== ip) {
+      throw new BadRequestException('Invalid ip address');
+    } else {
+      await this.commandBus.execute(new ValidateIpCommand(email));
+      return 'Ok';
     }
   }
 }

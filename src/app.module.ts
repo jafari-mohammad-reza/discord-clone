@@ -8,13 +8,12 @@ import { CoreModule } from './core/core.module';
 
 import { TopicModule } from './topic/topic.module';
 import { CategoryModule } from './category/category.module';
-import { AuthMiddleware } from './auth/auth.middleware';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './core/http-exception.filter';
+import { AuthMiddleware } from './auth/middleware/auth.middleware';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
     CoreModule,
     AuthModule,
     UserModule,
@@ -24,10 +23,10 @@ import { HttpExceptionFilter } from './core/http-exception.filter';
     TopicModule,
   ],
   providers: [
-    // {
-    //   provide: APP_FILTER,
-    //   useClass: HttpExceptionFilter,
-    // },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
   ],
 })
 export class AppModule implements NestModule {
