@@ -13,7 +13,7 @@ export class CreateCategoryHandler
   constructor(private readonly prismaService: PrismaService) {}
 
   async execute(command: CreateCategoryCommand) {
-    const { title } = command.createCategoryDto;
+    const { title } = command;
     if (
       await this.prismaService.category.findUnique({
         where: { title: title.trim() },

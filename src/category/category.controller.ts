@@ -34,7 +34,7 @@ export class CategoryController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) {}
+  ) { }
 
   @Get()
   @ApiQuery({ type: String, required: false, name: 'page' })
@@ -43,36 +43,22 @@ export class CategoryController {
     @Query('page') page: string = '1',
     @Query('take') take: string = '20',
   ) {
-    try {
-      if (!parseInt(page) || !parseInt(take))
-        throw new BadRequestException('Not valid page or take');
-      return this.queryBus.execute(new GetCategoriesQuery(+page, +take));
-    } catch (err) {
-      return err.message;
-    }
+    if (!parseInt(page) || !parseInt(take))
+      throw new BadRequestException('Not valid page or take');
+    return this.queryBus.execute(new GetCategoriesQuery(+page, +take));
   }
 
   @Get(':id')
   @ApiParam({ type: String, required: true, name: 'id' })
   async getCategory(@Param('id') id: string) {
-    try {
-      return await this.queryBus.execute(new GetCategoryQuery(id));
-    } catch (err) {
-      return err.message;
-    }
+    return await this.queryBus.execute(new GetCategoryQuery(id));
   }
 
   @Post()
   @ApiConsumes('application/x-www-form-urlencoded')
   @ApiBody({ type: CreateCategoryDto, required: true })
-  async createCategory(@Body() createCategoryDto: CreateCategoryDto) {
-    try {
-      return await this.commandBus.execute(
-        new CreateCategoryCommand(createCategoryDto),
-      );
-    } catch (err) {
-      return err.message;
-    }
+  async createCategory(@Body() { title }: CreateCategoryDto) {
+    return await this.commandBus.execute(new CreateCategoryCommand(title));
   }
 
   @Patch(':id')
@@ -81,25 +67,16 @@ export class CategoryController {
   @ApiBody({ type: UpdateCategoryDto, required: true })
   async updateCategory(
     @Param('id') id: string,
-    @Body() updateCategoryDto: UpdateCategoryDto,
+    @Body() { title }: UpdateCategoryDto,
   ) {
-    try {
-      updateCategoryDto.id = id;
-      return await this.commandBus.execute(
-        new UpdateCategoryCommand(updateCategoryDto),
-      );
-    } catch (err) {
-      return err.message;
-    }
+    return await this.commandBus.execute(
+      new UpdateCategoryCommand(id, title),
+    );
   }
 
   @Delete(':id')
   @ApiParam({ type: String, required: true, name: 'id' })
   async deleteCategory(@Param('id') id: string) {
-    try {
-      return await this.commandBus.execute(new DeleteCategoryCommand(id));
-    } catch (err) {
-      return err.message;
-    }
+    return await this.commandBus.execute(new DeleteCategoryCommand(id));
   }
 }

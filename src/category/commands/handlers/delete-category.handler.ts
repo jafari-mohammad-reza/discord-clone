@@ -1,6 +1,9 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { DeleteCategoryCommand } from '../impl/delete-category.command';
 import { PrismaService } from '../../../core/prisma.service';
+import { DeleteCategoryEvent } from '../../events/impl/delete-category.event';
+import { Category } from '@prisma/client/generated';
+import { NotFoundException } from '@nestjs/common';
 
 @CommandHandler(DeleteCategoryCommand)
 export class DeleteCategoryHandler
@@ -11,9 +14,13 @@ export class DeleteCategoryHandler
     private readonly eventBus: EventBus,
   ) {}
 
-  async execute(command: DeleteCategoryCommand) {
+  async execute(command: DeleteCategoryCommand): Promise<Category> {
     const { id } = command;
-    await this.prismaService.category.findFirstOrThrow({ where: { id } });
-    await this.prismaService.category.delete({ where: { id } });
+    const category = await this.prismaService.category.findFirst({
+      where: { id },
+    });
+    if (!category) throw new NotFoundException('Category not found');
+    this.eventBus.publish(new DeleteCategoryEvent(category.id));
+    return this.prismaService.category.delete({ where: { id } });
   }
 }

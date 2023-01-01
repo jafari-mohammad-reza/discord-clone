@@ -8,10 +8,10 @@ import { AlreadyExistException } from '../../../core/exceptions/already-exist.ex
 export class UpdateCategoryHandler
   implements ICommandHandler<UpdateCategoryCommand>
 {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) { }
 
   async execute(command: UpdateCategoryCommand) {
-    const { title, id } = command.updateCategoryDto;
+    const { title, id } = command;
     if (!(await this.prismaService.category.findUnique({ where: { id } })))
       throw new NotFoundException();
     if (
