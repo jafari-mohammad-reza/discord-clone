@@ -12,9 +12,10 @@ export class AuthMiddleware implements NestMiddleware {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
-  ) {}
+  ) { }
 
   async use(req: Request, res: Response, next: NextFunction): Promise<void> {
+
     const token: string =
       req.cookies['token'] ||
       req.headers.authorization?.split('Bearer')[1]?.trim();

@@ -5,12 +5,13 @@ import {
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { AlreadyExistException } from '../../../core/exceptions/already-exist.exception';
 
 @CommandHandler(CreateCategoryCommand)
 export class CreateCategoryHandler
   implements ICommandHandler<CreateCategoryCommand>
 {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) { }
 
   async execute(command: CreateCategoryCommand) {
     const { title } = command;
@@ -19,8 +20,8 @@ export class CreateCategoryHandler
         where: { title: title.trim() },
       })
     )
-      throw new BadRequestException(
-        'there is already on category with this title ',
+      throw new AlreadyExistException(
+        'title', 'category'
       );
     return await this.prismaService.category
       .create({
