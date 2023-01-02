@@ -2,6 +2,7 @@ import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { KickFromChannelCommand } from '../impl/kick-from-channel.command';
 import { PrismaService } from '../../../core/prisma.service';
 import { BadRequestException } from '@nestjs/common';
+import { Channel } from '@prisma/client/generated';
 
 @CommandHandler(KickFromChannelCommand)
 export class KickFromChannelHandler
@@ -12,7 +13,7 @@ export class KickFromChannelHandler
     private readonly eventBus: EventBus,
   ) {}
 
-  async execute(command: KickFromChannelCommand): Promise<void> {
+  async execute(command: KickFromChannelCommand): Promise<Channel> {
     const { userId, channelId } = command;
     const channel = await this.prismaService.channel.findUniqueOrThrow({
       where: { id: channelId },
@@ -26,7 +27,7 @@ export class KickFromChannelHandler
       throw new BadRequestException('this user is not in channel');
     if (channel.ownerId === userId)
       throw new BadRequestException('you can not remove this user');
-    await this.prismaService.channel.update({
+    return this.prismaService.channel.update({
       where: { id: channel.id },
       data: {
         members: {

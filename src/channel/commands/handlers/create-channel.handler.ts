@@ -5,6 +5,7 @@ import { AlreadyExistException } from '../../../core/exceptions/already-exist.ex
 import { NotFoundException } from '@nestjs/common';
 import { files } from 'dropbox';
 import { CreateChannelEvent } from '../../events/impl/create-channel.event';
+import { Channel } from '@prisma/client/generated';
 
 @CommandHandler(CreateChannelCommand)
 export class CreateChannelHandler
@@ -13,9 +14,9 @@ export class CreateChannelHandler
   constructor(
     private readonly prismaService: PrismaService,
     private readonly eventBus: EventBus,
-  ) {}
+  ) { }
 
-  async execute(command: CreateChannelCommand): Promise<void> {
+  async execute(command: CreateChannelCommand): Promise<Channel> {
     const { title, categoryId, file, isPublic } = command.createChannelDto;
     const { ownerId } = command;
     if (
@@ -31,8 +32,9 @@ export class CreateChannelHandler
     const createdChannel = await this.prismaService.channel.create({
       data: { title, categoryId, ownerId, isPublic: Boolean(isPublic) },
     });
-    return await this.eventBus.publish(
+    await this.eventBus.publish(
       new CreateChannelEvent(createdChannel, file),
     );
+    return createdChannel;
   }
 }

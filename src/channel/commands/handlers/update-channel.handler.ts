@@ -4,6 +4,7 @@ import { AlreadyExistException } from '../../../core/exceptions/already-exist.ex
 import { NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma.service';
 import { UpdateChannelEvent } from '../../events/impl/update-channel.event';
+import { Channel } from '@prisma/client/generated';
 
 @CommandHandler(UpdateChannelCommand)
 export class UpdateChannelHandler
@@ -14,7 +15,7 @@ export class UpdateChannelHandler
     private readonly eventBus: EventBus,
   ) {}
 
-  async execute(command: UpdateChannelCommand): Promise<void> {
+  async execute(command: UpdateChannelCommand): Promise<Channel> {
     const { title, categoryId, isPublic, file } = command.updateChannelDto;
     const { id } = command;
     if (title) {
@@ -36,5 +37,6 @@ export class UpdateChannelHandler
       data: { title, categoryId, isPublic: Boolean(isPublic) },
     });
     this.eventBus.publish(new UpdateChannelEvent(updatedChannel, file));
+    return updatedChannel;
   }
 }

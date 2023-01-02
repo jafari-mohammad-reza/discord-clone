@@ -2,6 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { LeaveChannelCommand } from '../impl/leave-channel.command';
 import { PrismaService } from '../../../core/prisma.service';
 import { BadRequestException } from '@nestjs/common';
+import { Channel } from '@prisma/client/generated';
 
 @CommandHandler(LeaveChannelCommand)
 export class LeaveChannelHandler
@@ -9,7 +10,7 @@ export class LeaveChannelHandler
 {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async execute(command: LeaveChannelCommand): Promise<void> {
+  async execute(command: LeaveChannelCommand): Promise<Channel> {
     const { channelId, user } = command;
     const channel = await this.prismaService.channel.findUniqueOrThrow({
       where: { id: channelId },
@@ -23,7 +24,7 @@ export class LeaveChannelHandler
       throw new BadRequestException('you are not in this channel');
     if (channel.ownerId === user.id)
       throw new BadRequestException('you are owner you cannot leave');
-    await this.prismaService.channel.update({
+    return this.prismaService.channel.update({
       where: { id: channel.id },
       data: {
         members: {

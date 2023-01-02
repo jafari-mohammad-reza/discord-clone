@@ -10,7 +10,6 @@ import {
   Patch,
   Post,
   Query,
-  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -46,7 +45,7 @@ export class ChannelController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) {}
+  ) { }
 
   @Get()
   @ApiQuery({ type: String, name: 'identifier', required: false })
@@ -72,14 +71,10 @@ export class ChannelController {
     )
     file: Express.Multer.File,
   ) {
-    try {
-      createChannelDto.file = file;
-      return await this.commandBus.execute(
-        new CreateChannelCommand(createChannelDto, authUser.id),
-      );
-    } catch (err) {
-      return err.message;
-    }
+    createChannelDto.file = file;
+    return await this.commandBus.execute(
+      new CreateChannelCommand(createChannelDto, authUser.id),
+    );
   }
   @Post('join/:id')
   @ApiParam({
@@ -89,11 +84,7 @@ export class ChannelController {
     description: 'channel id',
   })
   async joinToChannel(@Param('id') id: string, @AuthUser() user: User) {
-    try {
-      return await this.commandBus.execute(new JoinChannelCommand(id, user));
-    } catch (err) {
-      return err.message;
-    }
+    return await this.commandBus.execute(new JoinChannelCommand(id, user));
   }
   @Post('leave/:id')
   @ApiParam({
@@ -103,11 +94,7 @@ export class ChannelController {
     description: 'channel id',
   })
   async leaveChannel(@Param('id') id: string, @AuthUser() user: User) {
-    try {
-      return await this.commandBus.execute(new LeaveChannelCommand(id, user));
-    } catch (err) {
-      return err.message;
-    }
+    return await this.commandBus.execute(new LeaveChannelCommand(id, user));
   }
   @Post('kick/:userId')
   @UseGuards(ValidOwnerGuard)
@@ -122,13 +109,9 @@ export class ChannelController {
     @Param('userId') id: string,
     @Query('channelId') channelId: string,
   ) {
-    try {
-      return await this.commandBus.execute(
-        new KickFromChannelCommand(id, channelId),
-      );
-    } catch (err) {
-      return err.message;
-    }
+    return await this.commandBus.execute(
+      new KickFromChannelCommand(id, channelId),
+    );
   }
   @Patch(':id')
   @ApiBody({ type: UpdateChannelDto, required: true })
@@ -150,23 +133,15 @@ export class ChannelController {
     )
     file: Express.Multer.File,
   ) {
-    try {
-      updateChannelDto.file = file;
-      return await this.commandBus.execute(
-        new UpdateChannelCommand(updateChannelDto, id),
-      );
-    } catch (err) {
-      return err.message;
-    }
+    updateChannelDto.file = file;
+    return await this.commandBus.execute(
+      new UpdateChannelCommand(updateChannelDto, id),
+    );
   }
 
   @Delete(':id')
   @UseGuards(ValidOwnerGuard)
   async removeChannel(@Param('id') id: string) {
-    try {
-      return await this.commandBus.execute(new DeleteChannelCommand(id));
-    } catch (err) {
-      return err.message;
-    }
+    return await this.commandBus.execute(new DeleteChannelCommand(id));
   }
 }
