@@ -10,5 +10,5 @@ export class CreateChannelDto extends PickType(Channel, [
   @ApiProperty({ type: String, format: 'binary', required: true })
   @IsOptional()
   @IsEmpty()
-  file?: Express.Multer.File;
+  file?: Express.Multer.File  ;
 }

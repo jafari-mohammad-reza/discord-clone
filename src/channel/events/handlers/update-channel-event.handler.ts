@@ -35,12 +35,11 @@ export class UpdateChannelEventHandler
               logoPath: response.result.path_display,
             },
           });
-          await this.searchService.updateIndex(channel.id, channel);
+          await this.searchService.updateIndex(channel.id, updatedChannel);
         }
       })
       .catch((err) => {
         throw new InternalServerErrorException(err);
       });
-    // TODO add this channel to elastic search
   }
 }

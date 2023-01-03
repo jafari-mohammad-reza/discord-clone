@@ -5,7 +5,11 @@ import { User } from '../../../core/classTypes/User';
 import { CoreModule } from '../../../core/core.module';
 import { PrismaService } from '../../../core/prisma.service';
 import { JoinChannelHandler } from '../handlers/join-channel.handler';
-import { BadRequestException, HttpException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  NotFoundException,
+} from '@nestjs/common';
 
 describe('Join channel', function () {
   let prisma: PrismaService;
@@ -25,7 +29,7 @@ describe('Join channel', function () {
       ownerId: '1',
       members: [{ id: '2' }],
     };
-    prisma.channel.findUniqueOrThrow = jest.fn().mockResolvedValue(channel);
+    prisma.channel.findUnique = jest.fn().mockResolvedValue(channel);
     prisma.channel.update = jest.fn().mockResolvedValue(channel);
     const user = new User();
     user.id = 'user-id';
@@ -35,6 +39,19 @@ describe('Join channel', function () {
     });
     expect(response).toMatchObject(channel);
   });
+  it('should join channel fail channel not found.', async function () {
+    prisma.channel.findUnique = jest.fn().mockResolvedValue(null);
+    const user = new User();
+    user.id = 'user-id';
+    await joinChannelHandler
+      .execute({
+        id: 'channel-id',
+        user,
+      })
+      .catch((err: HttpException) => {
+        expect(err).toBeInstanceOf(NotFoundException);
+      });
+  });
   it('should join channel fail channel is private.', async function () {
     const channel = {
       id: 'channel-id',
@@ -42,7 +59,7 @@ describe('Join channel', function () {
       ownerId: '1',
       members: [{ id: '2' }],
     };
-    prisma.channel.findUniqueOrThrow = jest.fn().mockResolvedValue(channel);
+    prisma.channel.findUnique = jest.fn().mockResolvedValue(channel);
     const user = new User();
     user.id = 'user-id';
     await joinChannelHandler
@@ -62,7 +79,7 @@ describe('Join channel', function () {
       ownerId: 'user-id',
       members: [{ id: '2' }],
     };
-    prisma.channel.findUniqueOrThrow = jest.fn().mockResolvedValue(channel);
+    prisma.channel.findUnique = jest.fn().mockResolvedValue(channel);
     const user = new User();
     user.id = 'user-id';
     await joinChannelHandler
@@ -82,7 +99,8 @@ describe('Join channel', function () {
       ownerId: 'owner-id',
       members: [{ id: 'user-id' }],
     };
-    prisma.channel.findUniqueOrThrow = jest.fn().mockResolvedValue(channel);
+    prisma.channel.findUnique = jest.fn().mockResolvedValue(channel);
+    prisma.channel.update = jest.fn();
     const user = new User();
     user.id = 'user-id';
     await joinChannelHandler

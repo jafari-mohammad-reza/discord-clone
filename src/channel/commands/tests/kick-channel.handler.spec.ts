@@ -4,7 +4,11 @@ import { expectCt } from 'helmet';
 import { User } from '../../../core/classTypes/User';
 import { CoreModule } from '../../../core/core.module';
 import { PrismaService } from '../../../core/prisma.service';
-import { BadRequestException, HttpException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  NotFoundException,
+} from '@nestjs/common';
 import { KickFromChannelHandler } from '../handlers/kick-from-channel.handler';
 
 describe('leave channel', function () {
@@ -27,7 +31,7 @@ describe('leave channel', function () {
       ownerId: 'owner-id',
       members: [{ id: 'user-id' }],
     };
-    prisma.channel.findUniqueOrThrow = jest.fn().mockResolvedValue(channel);
+    prisma.channel.findUnique = jest.fn().mockResolvedValue(channel);
     prisma.channel.update = jest.fn().mockResolvedValue(channel);
     const response = await kickFromChannelHandler.execute({
       userId: 'user-id',
@@ -35,14 +39,31 @@ describe('leave channel', function () {
     });
     expect(response).toMatchObject(channel);
   });
-  it('should kick user from channel successfully.', async function () {
+  it('should kick user from channel fail channel not exist.', async function () {
     const channel = {
       id: 'channel-id',
       isPublic: true,
       ownerId: 'owner-id',
       members: [{ id: 'some-user' }],
     };
-    prisma.channel.findUniqueOrThrow = jest.fn().mockResolvedValue(channel);
+    prisma.channel.findUnique = jest.fn().mockResolvedValue(null);
+    await kickFromChannelHandler
+      .execute({
+        userId: 'user-id',
+        channelId: 'chausernnel-id',
+      })
+      .catch((err: HttpException) => {
+        expect(err).toBeInstanceOf(NotFoundException);
+      });
+  });
+  it('should kick user from channel fail user not exist in channel.', async function () {
+    const channel = {
+      id: 'channel-id',
+      isPublic: true,
+      ownerId: 'owner-id',
+      members: [{ id: 'some-user' }],
+    };
+    prisma.channel.findUnique = jest.fn().mockResolvedValue(channel);
     prisma.channel.update = jest.fn().mockResolvedValue(channel);
     await kickFromChannelHandler
       .execute({
@@ -54,14 +75,14 @@ describe('leave channel', function () {
         expect(err).toBeInstanceOf(BadRequestException);
       });
   });
-  it('should kick user from channel successfully.', async function () {
+  it('should kick user from channel fail user is not allowed to remove target user.', async function () {
     const channel = {
       id: 'channel-id',
       isPublic: true,
       ownerId: 'owner-id',
       members: [{ id: 'owner-id' }],
     };
-    prisma.channel.findUniqueOrThrow = jest.fn().mockResolvedValue(channel);
+    prisma.channel.findUnique = jest.fn().mockResolvedValue(channel);
     prisma.channel.update = jest.fn().mockResolvedValue(channel);
     await kickFromChannelHandler
       .execute({

@@ -17,7 +17,7 @@ export class CreateChannelEventHandler
     private readonly prismaService: PrismaService,
     private readonly dropBoxService: DropBoxService,
     private readonly searchService: SearchService,
-  ) { }
+  ) {}
 
   async handle(event: CreateChannelEvent): Promise<void> {
     const { channel, file } = event;
@@ -34,8 +34,7 @@ export class CreateChannelEventHandler
           logoPath: response.result.path_display,
         },
       });
-      await this.searchService.addIndex(channel);
+      await this.searchService.addIndex(newChannel);
     }
-
   }
 }
