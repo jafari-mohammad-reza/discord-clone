@@ -1,4 +1,5 @@
 import {
+  HttpException,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -13,11 +14,15 @@ export class DropBoxService {
   private readonly dropBox: Dropbox;
 
   constructor(@Inject(DROP_BOX_CONFIG) private readonly config: DropBoxConfig) {
-    this.dropBox = new Dropbox({ accessToken: config.access_token });
+    try {
+      this.dropBox = new Dropbox({ accessToken: config.access_token });
+    } catch (err) {
+      throw new HttpException('Dropbox service failed to maintain', 501);
+    }
   }
 
   uploadImage(
-    file: Express.Multer.File,
+    file: Express.Multer.File | Buffer,
     filePath: string,
   ): Promise<DropboxResponse<FileMetadata>> {
     return this.dropBox
