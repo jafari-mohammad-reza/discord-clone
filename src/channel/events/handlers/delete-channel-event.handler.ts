@@ -13,8 +13,12 @@ export class DeleteChannelEventHandler
   ) {}
 
   async handle(event: DeleteChannelEvent): Promise<void> {
-    const { channel } = event;
-    this.dropBoxService.deleteImage(channel.logo, channel.logoPath);
-    await this.searchService.removeIndex(channel.id);
+    try {
+      const { channel } = event;
+      this.dropBoxService.deleteImage(channel.logo, channel.logoPath);
+      await this.searchService.removeIndex(channel.id);
+    } catch (err) {
+      return;
+    }
   }
 }

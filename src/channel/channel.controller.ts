@@ -4,6 +4,8 @@ import {
   Delete,
   FileTypeValidator,
   Get,
+  HttpCode,
+  HttpStatus,
   MaxFileSizeValidator,
   Param,
   ParseFilePipe,
@@ -45,7 +47,7 @@ export class ChannelController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) { }
+  ) {}
 
   @Get()
   @ApiQuery({ type: String, name: 'identifier', required: false })
@@ -77,6 +79,7 @@ export class ChannelController {
     );
   }
   @Post('join/:id')
+  @HttpCode(200)
   @ApiParam({
     type: String,
     required: true,
@@ -87,6 +90,7 @@ export class ChannelController {
     return await this.commandBus.execute(new JoinChannelCommand(id, user));
   }
   @Post('leave/:id')
+  @HttpCode(200)
   @ApiParam({
     type: String,
     required: true,
@@ -97,6 +101,7 @@ export class ChannelController {
     return await this.commandBus.execute(new LeaveChannelCommand(id, user));
   }
   @Post('kick/:userId')
+  @HttpCode(200)
   @UseGuards(ValidOwnerGuard)
   @ApiParam({
     type: String,

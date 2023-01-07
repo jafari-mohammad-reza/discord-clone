@@ -13,16 +13,20 @@ export class KickFromChannelEventHandler
   ) {}
 
   async handle(event: KickFromChannelEvent): Promise<void> {
-    const { userId, channelTitle } = event;
-    const user = await this.prismaService.user.findUniqueOrThrow({
-      where: { id: userId },
-    });
-    return this.commandBus.execute(
-      new NotifyUserCommand(
-        user.email,
-        channelTitle,
-        `You have been kicked from ${channelTitle}.`,
-      ),
-    );
+    try {
+      const { userId, channelTitle } = event;
+      const user = await this.prismaService.user.findUniqueOrThrow({
+        where: { id: userId },
+      });
+      return this.commandBus.execute(
+        new NotifyUserCommand(
+          user.email,
+          channelTitle,
+          `You have been kicked from ${channelTitle}.`,
+        ),
+      );
+    } catch (err) {
+      return;
+    }
   }
 }

@@ -6,6 +6,7 @@ import { CoreModule } from '../../../core/core.module';
 import { PrismaService } from '../../../core/prisma.service';
 import {
   BadRequestException,
+  ForbiddenException,
   HttpException,
   NotFoundException,
 } from '@nestjs/common';
@@ -91,7 +92,7 @@ describe('leave channel', function () {
       })
       .catch((err: HttpException) => {
         expect(err.message).toMatch('you can not remove this user');
-        expect(err).toBeInstanceOf(BadRequestException);
+        expect(err).toBeInstanceOf(ForbiddenException);
       });
   });
 });

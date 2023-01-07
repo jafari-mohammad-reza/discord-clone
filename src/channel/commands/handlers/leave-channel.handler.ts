@@ -25,7 +25,6 @@ export class LeaveChannelHandler
       throw new BadRequestException('you are not in this channel');
     if (channel.ownerId === user.id)
       throw new BadRequestException('you are owner you cannot leave');
-    console.log(channel.members);
     const newMembers = new Set(channel.members);
     newMembers.forEach((u) => (u.id === user.id ? newMembers.delete(u) : u));
     return this.prismaService.channel.update({

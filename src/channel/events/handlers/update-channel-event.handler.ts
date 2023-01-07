@@ -21,25 +21,29 @@ export class UpdateChannelEventHandler
   ) {}
 
   handle(event: UpdateChannelEvent): void {
-    const { channel, file } = event;
-    const { title } = channel;
-    this.dropBoxService.deleteImage(channel.logo, channel.logoPath);
-    this.dropBoxService
-      .uploadImage(file, ReturnUploadPath('channel/logo', title, file))
-      .then(async (response: DropboxResponse<FileMetadata>) => {
-        if (response.status === 200) {
-          const updatedChannel = await this.prismaService.channel.update({
-            where: { title },
-            data: {
-              logo: response.result.rev,
-              logoPath: response.result.path_display,
-            },
-          });
-          await this.searchService.updateIndex(channel.id, updatedChannel);
-        }
-      })
-      .catch((err) => {
-        throw new InternalServerErrorException(err);
-      });
+    try {
+      const { channel, file } = event;
+      const { title } = channel;
+      this.dropBoxService.deleteImage(channel.logo, channel.logoPath);
+      this.dropBoxService
+        .uploadImage(file, ReturnUploadPath('channel/logo', title, file))
+        .then(async (response: DropboxResponse<FileMetadata>) => {
+          if (response.status === 200) {
+            const updatedChannel = await this.prismaService.channel.update({
+              where: { title },
+              data: {
+                logo: response.result.rev,
+                logoPath: response.result.path_display,
+              },
+            });
+            await this.searchService.updateIndex(channel.id, updatedChannel);
+          }
+        })
+        .catch((err) => {
+          throw new InternalServerErrorException(err);
+        });
+    } catch (err) {
+      return;
+    }
   }
 }

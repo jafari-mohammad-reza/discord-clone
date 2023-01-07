@@ -8,6 +8,8 @@ import { DROP_BOX_CONFIG } from './drop-box.module-defenition';
 import { DropBoxConfig } from './drop-box.config';
 import { Dropbox, DropboxResponse, Error, files } from 'dropbox';
 import FileMetadata = files.FileMetadata;
+import { HttpExceptionFilter } from '../core/http-exception.filter';
+import { readableStreamLikeToAsyncGenerator } from 'rxjs/internal/util/isReadableStreamLike';
 
 @Injectable()
 export class DropBoxService {
@@ -21,17 +23,14 @@ export class DropBoxService {
     }
   }
 
-  uploadImage(
+  async uploadImage(
     file: Express.Multer.File | Buffer,
     filePath: string,
   ): Promise<DropboxResponse<FileMetadata>> {
-    return this.dropBox
-      .filesUpload({ path: filePath, contents: file.buffer })
-      .catch((uploadErr: Error<files.UploadError>) => {
-        throw new InternalServerErrorException(
-          `Failed while uploading file ${uploadErr}`,
-        );
-      });
+    return await this.dropBox.filesUpload({
+      path: filePath,
+      contents: file.buffer,
+    });
   }
 
   deleteImage(fileRev: string, filePath: string) {

@@ -4,10 +4,15 @@ import { PrismaService } from '../../../core/prisma.service';
 import { DropBoxService } from '../../../drop-box/drop-box.service';
 import * as path from 'path';
 import { DropboxResponse, files } from 'dropbox';
-import { InternalServerErrorException } from '@nestjs/common';
+import {
+  HttpException,
+  InternalServerErrorException,
+  UseFilters,
+} from '@nestjs/common';
 import FileMetadata = files.FileMetadata;
 import ReturnUploadPath from '../../../core/utils/returnUploadPath';
 import { SearchService } from '../../../search/search.service';
+import { HttpExceptionFilter } from '../../../core/http-exception.filter';
 
 @EventsHandler(CreateChannelEvent)
 export class CreateChannelEventHandler
@@ -19,22 +24,26 @@ export class CreateChannelEventHandler
     private readonly searchService: SearchService,
   ) {}
 
-  async handle(event: CreateChannelEvent): Promise<void> {
-    const { channel, file } = event;
-    const { title } = channel;
-    const response = await this.dropBoxService.uploadImage(
-      file,
-      ReturnUploadPath('channel/logo', title, file),
-    );
-    if (response.status === 200) {
-      const newChannel = await this.prismaService.channel.update({
-        where: { title },
-        data: {
-          logo: response.result.rev,
-          logoPath: response.result.path_display,
-        },
-      });
-      await this.searchService.addIndex(newChannel);
+  async handle(event: CreateChannelEvent): Promise<void | string> {
+    try {
+      const { channel, file } = event;
+      const { title } = channel;
+      const response = await this.dropBoxService.uploadImage(
+        file,
+        ReturnUploadPath('channel/logo', title, file),
+      );
+      if (response.status === 200) {
+        const newChannel = await this.prismaService.channel.update({
+          where: { title },
+          data: {
+            logo: response.result.rev,
+            logoPath: response.result.path_display,
+          },
+        });
+        await this.searchService.addIndex(newChannel);
+      }
+    } catch (err) {
+      return;
     }
   }
 }

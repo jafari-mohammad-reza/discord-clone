@@ -7,7 +7,7 @@ services:
       networks:
         - discord_network
       ports:
-        - "5432:5432"
+        - "5432:5432" 
       environment:
         POSTGRES_USER: admin
         POSTGRES_PASSWORD: admin
@@ -43,7 +43,7 @@ services:
         - redis-data:/data
         - redis-conf:/usr/local/etc/redis/redis.conf
     elastic-search:
-      image: docker.elastic.co/elasticsearch/elasticsearch:8.5.3
+      image: elasticsearch:8.5.3
       container_name: es-container
       environment:
         - node.name=es-container
@@ -64,7 +64,7 @@ services:
         - discord_network
     kibana:
       container_name: kb-container
-      image: docker.elastic.co/kibana/kibana:8.5.3
+      image: kibana:8.5.3
       environment:
         - ELASTICSEARCH_HOSTS=http://es-container:9200
       networks:

@@ -18,6 +18,7 @@ import * as cookieParser from 'cookie-parser';
 import { LoginDto } from '../src/auth/dtos/login.dto';
 import { hashSync } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { testApplicationSetup } from './test.utils';
 describe('Auth controller api endpoints test', function () {
   let httpServer: HttpServer;
   let prismaMock: PrismaService;
@@ -27,31 +28,7 @@ describe('Auth controller api endpoints test', function () {
     const module = await Test.createTestingModule({
       imports: [AppModule, CoreModule],
     }).compile();
-    app = await module.createNestApplication();
-    app.enableCors({ origin: '*' });
-    app.use(
-      helmet({
-        hsts: true,
-        crossOriginEmbedderPolicy: true,
-        noSniff: true,
-        hidePoweredBy: true,
-        xssFilter: true,
-      }),
-    );
-    app.enableVersioning({
-      prefix: 'api/v',
-      type: VersioningType.URI,
-    });
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transform: true,
-      }),
-    );
-    app.use(cookieParser());
-    await app.init();
-    await app.listen(5000);
+    app = await testApplicationSetup(module);
     prismaMock = module.get<PrismaService>(PrismaService);
     jwtService = module.get<JwtService>(JwtService);
     httpServer = app.getHttpServer();

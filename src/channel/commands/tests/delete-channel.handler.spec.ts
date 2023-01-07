@@ -19,17 +19,13 @@ describe('Delete Channel', function () {
       module.get<DeleteChannelHandler>(DeleteChannelHandler);
   });
   it('should delete channel successfully', async function () {
-    prismaMock.channel.findUniqueOrThrow = jest
-      .fn()
-      .mockResolvedValue({ id: 'test' });
+    prismaMock.channel.findUnique = jest.fn().mockResolvedValue({ id: 'test' });
     prismaMock.channel.delete = jest.fn().mockResolvedValue({ id: 'test' });
     const response = await deleteChannelHandler.execute({ id: 'test' });
     expect(response).toMatchObject({ id: 'test' });
   });
   it('should delete channel fail it does not exist', async function () {
-    prismaMock.channel.findUniqueOrThrow = jest
-      .fn()
-      .mockRejectedValue(new NotFoundException());
+    prismaMock.channel.findUnique = jest.fn().mockResolvedValue(null);
 
     await deleteChannelHandler
       .execute({ id: 'id' })
