@@ -3,10 +3,7 @@ import { DeleteCategoryHandler } from '../handlers/delete-category.handler';
 import { Test } from '@nestjs/testing';
 import { CoreModule } from '../../../core/core.module';
 import { CqrsModule } from '@nestjs/cqrs';
-import { Category } from '@prisma/client/generated';
 import { HttpException, NotFoundException } from '@nestjs/common';
-import { exploreApiOperationMetadata } from '@nestjs/swagger/dist/explorers/api-operation.explorer';
-import { expectCt } from 'helmet';
 
 describe('Delete category', function () {
   let prisma: PrismaService;

@@ -1,11 +1,12 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ValidateIpCommand } from '../impl/validate-ip.command';
-import { PrismaService } from '../../../core/prisma.service';
-import { BadRequestException } from '@nestjs/common';
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { ValidateIpCommand } from "../impl/validate-ip.command";
+import { PrismaService } from "../../../core/prisma.service";
+import { BadRequestException } from "@nestjs/common";
 
 @CommandHandler(ValidateIpCommand)
 export class ValidateIpHandler implements ICommandHandler<ValidateIpCommand> {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) {
+  }
 
   async execute(command: ValidateIpCommand): Promise<void> {
     try {

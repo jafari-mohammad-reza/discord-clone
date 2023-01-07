@@ -12,7 +12,7 @@ export class DeleteCategoryHandler
   constructor(
     private readonly prismaService: PrismaService,
     private readonly eventBus: EventBus,
-  ) { }
+  ) {}
 
   async execute(command: DeleteCategoryCommand): Promise<Category> {
     const { id } = command;

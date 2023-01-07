@@ -34,7 +34,7 @@ export class CategoryController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) { }
+  ) {}
 
   @Get()
   @ApiQuery({ type: String, required: false, name: 'page' })
@@ -69,9 +69,7 @@ export class CategoryController {
     @Param('id') id: string,
     @Body() { title }: UpdateCategoryDto,
   ) {
-    return await this.commandBus.execute(
-      new UpdateCategoryCommand(id, title),
-    );
+    return await this.commandBus.execute(new UpdateCategoryCommand(id, title));
   }
 
   @Delete(':id')

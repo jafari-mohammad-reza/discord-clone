@@ -1,3 +1,4 @@
 export class GetCategoryQuery {
-  constructor(public readonly id: string) {}
+  constructor(public readonly id: string) {
+  }
 }

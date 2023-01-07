@@ -1,3 +1,4 @@
 export class SendForgotPasswordCommand {
-  constructor(public readonly email: string) {}
+  constructor(public readonly email: string) {
+  }
 }

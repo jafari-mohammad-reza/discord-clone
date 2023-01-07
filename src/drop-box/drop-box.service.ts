@@ -1,15 +1,8 @@
-import {
-  HttpException,
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { DROP_BOX_CONFIG } from './drop-box.module-defenition';
 import { DropBoxConfig } from './drop-box.config';
-import { Dropbox, DropboxResponse, Error, files } from 'dropbox';
+import { Dropbox, DropboxResponse, files } from 'dropbox';
 import FileMetadata = files.FileMetadata;
-import { HttpExceptionFilter } from '../core/http-exception.filter';
-import { readableStreamLikeToAsyncGenerator } from 'rxjs/internal/util/isReadableStreamLike';
 
 @Injectable()
 export class DropBoxService {

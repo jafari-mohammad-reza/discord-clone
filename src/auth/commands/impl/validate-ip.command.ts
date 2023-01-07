@@ -1,3 +1,4 @@
 export class ValidateIpCommand {
-  constructor(public readonly email: string) {}
+  constructor(public readonly email: string) {
+  }
 }
