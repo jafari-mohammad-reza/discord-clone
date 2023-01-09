@@ -1,5 +1,5 @@
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { GetTopicQuery } from '../impl/get-topic.query';
+import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
+import { GetTopicQuery } from "../impl/get-topic.query";
 
 @QueryHandler(GetTopicQuery)
 export class GetTopicHandler implements IQueryHandler<GetTopicQuery> {

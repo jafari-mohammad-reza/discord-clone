@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class Topic implements TopicType {
   @IsUUID()
-  @ApiProperty({ type: String, required: true, name: 'channel id' })
+  @ApiProperty({ type: String, required: true, name: 'channelId' })
   channelId: string;
   id: number;
   @IsString()

@@ -1,7 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { ChannelModule } from './channel/channel.module';
-import { UserModule } from './user/user.module';
 import { MailModule } from './mail/mail.module';
 import { CoreModule } from './core/core.module';
 
@@ -10,17 +9,17 @@ import { CategoryModule } from './category/category.module';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './core/http-exception.filter';
 import { AuthMiddleware } from './auth/middleware/auth.middleware';
-import { TopicController } from './topic/topic.controller';
+import { DeveloperModule } from './developer/developer.module';
 
 @Module({
   imports: [
     CoreModule,
     AuthModule,
-    UserModule,
     ChannelModule,
     MailModule,
     CategoryModule,
     TopicModule,
+    DeveloperModule,
   ],
   providers: [
     {

@@ -6,15 +6,17 @@ import { CreateTopicHandler } from './commands/handlers/create-topic.handler';
 import { UpdateTopicHandler } from './commands/handlers/update-topic.handler';
 import { DeleteTopicHandler } from './commands/handlers/delete-topic.handler';
 import { ValidOwnerGuard } from '../channel/valid-owner.guard';
+import { ValidTopicGuard } from './valid-topic.guard';
 
 const CommandHandlers = [
   CreateTopicHandler,
   UpdateTopicHandler,
   DeleteTopicHandler,
 ];
+
 @Module({
   imports: [CoreModule, CqrsModule],
-  providers: [...CommandHandlers, ValidOwnerGuard],
+  providers: [...CommandHandlers, ValidOwnerGuard, ValidTopicGuard],
   controllers: [TopicController],
 })
 export class TopicModule {}

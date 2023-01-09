@@ -1,5 +1,8 @@
-import { UpdateTopicDto } from '../../dtos/update-topic.dto';
+import { ModifyTopicDto } from '../../dtos/modify-topic.dto';
 
 export class UpdateTopicCommand {
-  constructor(public readonly dto: UpdateTopicDto) {}
+  constructor(
+    public readonly id: number,
+    public readonly dto: ModifyTopicDto,
+  ) {}
 }

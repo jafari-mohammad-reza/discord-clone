@@ -15,7 +15,7 @@ import * as cookieParser from 'cookie-parser';
 import { SearchService } from '../src/search/search.service';
 import { SearchModule } from '../src/search/search.module';
 import * as superRequest from 'supertest';
-import { CreateChannelDto } from 'src/channel/dtos/create-channel.dto';
+import { ModifyChannelDto } from 'src/channel/dtos/create-channel.dto';
 import { DropBoxService } from '../src/drop-box/drop-box.service';
 import { EventBus } from '@nestjs/cqrs';
 import { CreateChannelEvent } from '../src/channel/events/impl/create-channel.event';

@@ -1,10 +1,21 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CreateTopicCommand } from '../impl/create-topic.command';
 import { UpdateTopicCommand } from '../impl/update-topic.command';
+import { Topic } from '@prisma/client/generated';
+import { PrismaService } from '../../../core/prisma.service';
+import { AlreadyExistException } from '../../../core/exceptions/already-exist.exception';
+import { NotFoundException } from '@nestjs/common';
 
 @CommandHandler(UpdateTopicCommand)
 export class UpdateTopicHandler implements ICommandHandler<UpdateTopicCommand> {
-  execute(command: UpdateTopicCommand): Promise<any> {
-    return Promise.resolve(undefined);
+  constructor(private readonly prismaService: PrismaService) {}
+
+  async execute(command: UpdateTopicCommand): Promise<Topic> {
+    const {
+      dto: { name, channelId },
+      id,
+    } = command;
+    if (await this.prismaService.topic.findFirst({ where: { name: name } }))
+      throw new AlreadyExistException('Topic', 'name');
+    return this.prismaService.topic.update({ where: { id }, data: { name } });
   }
 }
