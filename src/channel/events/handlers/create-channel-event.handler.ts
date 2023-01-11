@@ -4,6 +4,7 @@ import { PrismaService } from '../../../core/prisma.service';
 import { DropBoxService } from '../../../drop-box/drop-box.service';
 import ReturnUploadPath from '../../../core/utils/returnUploadPath';
 import { SearchService } from '../../../search/search.service';
+import { Topic } from '../../../core/classTypes/Topic';
 
 @EventsHandler(CreateChannelEvent)
 export class CreateChannelEventHandler
@@ -24,6 +25,9 @@ export class CreateChannelEventHandler
         ReturnUploadPath('channel/logo', title, file),
       );
       if (response.status === 200) {
+        const createdGlobalTopic = await this.prismaService.topic.create({
+          data: { name: 'Global', channelId: channel.id },
+        });
         const newChannel = await this.prismaService.channel.update({
           where: { title },
           data: {

@@ -14,8 +14,20 @@ export class UpdateTopicHandler implements ICommandHandler<UpdateTopicCommand> {
       dto: { name, channelId },
       id,
     } = command;
-    if (await this.prismaService.topic.findFirst({ where: { name: name } }))
+    if (
+      await this.prismaService.topic.findFirst({
+        where: { name: name, channelId },
+      })
+    )
       throw new AlreadyExistException('Topic', 'name');
+    if (
+      !(
+        (await this.prismaService.channel.findUnique({
+          where: { id: channelId },
+        })) || !(await this.prismaService.topic.findUnique({ where: { id } }))
+      )
+    )
+      throw new NotFoundException();
     return this.prismaService.topic.update({ where: { id }, data: { name } });
   }
 }

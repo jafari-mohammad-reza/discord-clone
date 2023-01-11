@@ -12,7 +12,11 @@ export class CreateTopicHandler implements ICommandHandler<CreateTopicCommand> {
     const {
       dto: { name, channelId },
     } = command;
-    if (await this.prismaService.topic.findFirst({ where: { name: name } }))
+    if (
+      await this.prismaService.topic.findFirst({
+        where: { name: name, channelId },
+      })
+    )
       throw new AlreadyExistException('Topic', 'name');
     if (
       !(await this.prismaService.channel.findUnique({

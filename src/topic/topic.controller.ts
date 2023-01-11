@@ -39,15 +39,20 @@ export class TopicController {
   ) {}
 
   @Get()
-  async getTopics() {
-    return await this.queryBus.execute(new GetTopicsQuery());
+  @ApiQuery({ name: 'channelId', required: true, type: String })
+  async getTopics(@Query('channelId') channelId: string) {
+    return await this.queryBus.execute(new GetTopicsQuery(channelId));
   }
 
   @Get('/:topicId')
   @ApiParam({ type: Number, required: true, name: 'topicId' })
-  async getTopic(@Param('topicId') id: string) {
+  @ApiQuery({ name: 'channelId', required: true, type: String })
+  async getTopic(
+    @Param('topicId') id: string,
+    @Query('channelId') channelId: string,
+  ) {
     if (!Number(id)) throw new BadRequestException('id is a number');
-    return await this.queryBus.execute(new GetTopicQuery(id));
+    return await this.queryBus.execute(new GetTopicQuery(+id, channelId));
   }
 
   @Post()

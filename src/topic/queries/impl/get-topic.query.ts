@@ -1,4 +1,3 @@
 export class GetTopicQuery {
-  constructor(private readonly id: string) {
-  }
+  constructor(public readonly id: number, public readonly channelId: string) {}
 }
