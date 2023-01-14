@@ -8,7 +8,6 @@ import {
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { SearchService } from '../search/search.service';
 import { PrismaService } from '../core/prisma.service';
-import { Sql } from '@prisma/client/runtime';
 
 @Controller({
   path: 'developer',
@@ -20,6 +19,7 @@ export class DeveloperController {
     private readonly searchService: SearchService,
     private readonly prismaService: PrismaService,
   ) {}
+
   @Get('elastic/:index')
   @ApiParam({ name: 'index', required: true, type: String })
   async cleanElasticIndex(@Param('index') index: string) {
@@ -29,6 +29,7 @@ export class DeveloperController {
       throw new InternalServerErrorException(err);
     }
   }
+
   @Get('prisma/:table')
   @ApiParam({ name: 'table', required: true, type: String })
   async cleanPrismaTable(@Param('table') table: string) {

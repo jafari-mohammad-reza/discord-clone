@@ -1,16 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing';
 import helmet from 'helmet';
 import {
-  HttpServer,
   INestApplication,
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
-import { AppModule } from '../src/app.module';
-import { CoreModule } from '../src/core/core.module';
-import { PrismaService } from '../src/core/prisma.service';
-import { JwtService } from '@nestjs/jwt';
 
 export async function testApplicationSetup(module: TestingModule) {
   let app: INestApplication;

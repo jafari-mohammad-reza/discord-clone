@@ -28,7 +28,7 @@ import { GetTopicQuery } from './queries/impl/get-topic.query';
 import { ValidTopicGuard } from './valid-topic.guard';
 
 @Controller({
-  path: 'topic',
+  path: 'topics',
   version: '1',
 })
 @ApiTags('Topic')

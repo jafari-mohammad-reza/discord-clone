@@ -1,33 +1,18 @@
-import {
-  HttpServer,
-  INestApplication,
-  UploadedFile,
-  ValidationPipe,
-  VersioningType,
-} from '@nestjs/common';
+import { HttpServer, INestApplication } from '@nestjs/common';
 import { PrismaService } from '../src/core/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import { CoreModule } from '../src/core/core.module';
-import helmet from 'helmet';
-import * as cookieParser from 'cookie-parser';
 import { SearchService } from '../src/search/search.service';
 import { SearchModule } from '../src/search/search.module';
 import * as superRequest from 'supertest';
-import { ModifyChannelDto } from 'src/channel/dtos/create-channel.dto';
 import { DropBoxService } from '../src/drop-box/drop-box.service';
 import { EventBus } from '@nestjs/cqrs';
-import { CreateChannelEvent } from '../src/channel/events/impl/create-channel.event';
 import { Category } from '@prisma/client/generated';
-import { mockFn } from 'jest-mock-extended';
 import { fileMock } from '../src/core/utils/fileMock';
 import { testApplicationSetup } from './test.utils';
-import * as http from 'http';
-import * as stream from 'stream';
 import { v4 } from 'uuid';
-import { UpdateChannelEvent } from '../src/channel/events/impl/update-channel.event';
-import * as https from 'https';
 
 describe('Channel controller', function () {
   let httpServer: HttpServer;
@@ -61,6 +46,7 @@ describe('Channel controller', function () {
   afterAll(async () => {
     await app.close();
   });
+
   async function authorizeUser() {
     const testTokenCookie = await jwtService.signAsync({
       email: 'testmail@gmail.com',
@@ -70,6 +56,7 @@ describe('Channel controller', function () {
       .mockResolvedValue({ email: 'testmail@gmail.com' });
     return testTokenCookie;
   }
+
   describe('Get channels', () => {
     it('should return list of all channels', async function () {
       const token = await authorizeUser();
@@ -438,6 +425,7 @@ describe('Channel controller', function () {
       const channelTitle = Math.floor(Math.random() * 100000).toString();
       return { file, channelTitle };
     }
+
     const updateChannelBaseRequest = async (
       title?: string,
       categoryId?: string,

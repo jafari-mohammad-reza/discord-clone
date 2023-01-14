@@ -1,25 +1,16 @@
-import {
-  ConsoleLogger,
-  HttpException,
-  HttpServer,
-  INestApplication,
-  ValidationPipe,
-  VersioningType,
-} from '@nestjs/common';
+import { HttpException, HttpServer, INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
-import * as cookieParser from 'cookie-parser';
-import helmet from 'helmet';
 import { AppModule } from '../src/app.module';
 import { CoreModule } from '../src/core/core.module';
 import { Category } from '../src/core/classTypes/Category';
 import { PrismaService } from '../src/core/prisma.service';
 import * as testRequest from 'supertest';
-import { log } from 'console';
 import { CreateCategoryDto } from '../src/category/dtos/create-category.dto';
 import { AlreadyExistException } from '../src/core/exceptions/already-exist.exception';
 import { UpdateCategoryDto } from '../src/category/dtos/update-category.dto';
 import { testApplicationSetup } from './test.utils';
+
 describe('Category controller', function () {
   let httpServer: HttpServer;
   let prismaMock: PrismaService;

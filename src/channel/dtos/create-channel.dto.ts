@@ -1,13 +1,13 @@
-import { ApiProperty, PickType } from '@nestjs/swagger';
-import { Channel } from '../../core/classTypes/Channel';
-import { IsOptional } from 'class-validator';
+import { ApiProperty, PickType } from "@nestjs/swagger";
+import { Channel } from "../../core/classTypes/Channel";
+import { IsOptional } from "class-validator";
 
 export class CreateChannelDto extends PickType(Channel, [
-  'title',
-  'categoryId',
-  'isPublic',
+  "title",
+  "categoryId",
+  "isPublic"
 ]) {
-  @ApiProperty({ type: String, format: 'binary', required: true })
+  @ApiProperty({ type: String, format: "binary", required: true })
   @IsOptional()
   file?: Express.Multer.File;
 }

@@ -29,6 +29,7 @@ describe("Reset password handler", function() {
     prisma.user.findUnique = jest
       .fn()
       .mockResolvedValue({ password: hashSync("Test123$", 10) });
+    prisma.user.update = jest.fn().mockResolvedValue({})
     await resetPasswordHandler.execute(user);
   });
   it("should reset password fail user notfound", async function() {
