@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import {Injectable, InternalServerErrorException} from "@nestjs/common";
 import { MailerService } from "@nestjs-modules/mailer";
 
 @Injectable()
@@ -7,11 +7,15 @@ export class MailService {
   }
 
   async sendEmail(to: string, subject: string, content: any) {
-    await this.mailerService.sendMail({
-      from: "discord-clone@gmail.com",
-      to,
-      subject,
-      html: `<body>${content}</body>`
-    });
+    try{
+      await this.mailerService.sendMail({
+        from: "discord-clone@gmail.com",
+        to,
+        subject,
+        html: `<body>${content}</body>`
+      });
+    }catch (err){
+      console.log(err)
+    }
   }
 }

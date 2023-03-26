@@ -1,16 +1,16 @@
-FROM node:16-alpine As development
-
+FROM node:18-alpine As development
+RUN npm i -g pnpm
 WORKDIR /usr/src/app
+COPY package.json pnpm-lock.yaml ./
 
-COPY package*.json ./
-
-RUN npm install
+RUN pnpm install
 
 COPY . .
 
-RUN npm run build
+RUN pnpm run build
 
-FROM node:16-alpine as production
+CMD ["pnpm" , "run" , "start:debug"]
+FROM node:18-alpine as production
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
@@ -19,10 +19,10 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm install --only=production
+RUN pnpm install --only=production
 
 COPY . .
 
 COPY --from=development /usr/src/app/dist ./dist
-
-CMD ["node", "dist/main"]
+EXPOSE 5000
+CMD ["pnpm" , "run" , "start:prod"]

@@ -5,7 +5,7 @@ services:
       container_name: postgres
       restart: always
       networks:
-        - discord_network
+         discord_network:
       ports:
         - "5432:5432" 
       environment:
@@ -25,7 +25,7 @@ services:
       volumes:
         - pgadmin-data:/var/lib/pgadmin
       networks:
-        - discord_network
+         discord_network:
       depends_on:
         - postgres
       command:
@@ -38,7 +38,7 @@ services:
         - "6379:6379"
       container_name: redis
       networks:
-        - discord_network
+         discord_network:
       volumes:
         - redis-data:/data
         - redis-conf:/usr/local/etc/redis/redis.conf
@@ -61,18 +61,38 @@ services:
       ports:
         - "9200:9200"
       networks:
-        - discord_network
+         discord_network:
     kibana:
       container_name: kb-container
       image: kibana:8.5.3
       environment:
         - ELASTICSEARCH_HOSTS=http://es-container:9200
       networks:
-        - discord_network
+         discord_network:
       depends_on:
         - elastic-search
       ports:
         - "5601:5601"
+    app:
+      build:
+        context: .
+        dockerfile: Dockerfile
+        target: development
+      depends_on:
+        - postgres
+        - elastic-search
+      environment:
+        - ELASTICSEARCH_NODE=http://elastic-search:9200
+        - DATABASE_URL=postgresql://admin:admin@postgres/discord?schema=public
+      ports:
+        - "5000:5000"
+      env_file:
+        - ./.env
+      volumes:
+        - .:/usr/src/app
+
+      networks:
+        discord_network:
 volumes:
   postgres:
   pgadmin-data:
@@ -82,3 +102,5 @@ volumes:
     driver: local
 networks:
     discord_network:
+      driver: bridge
+      internal: true
