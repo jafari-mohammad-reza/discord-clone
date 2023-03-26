@@ -18,7 +18,7 @@ export class FriendRequestService {
       searchBy === FriendRequestSearchBy.SENDER
         ? { sender: { id: userId } }
         : { receiver: { id: userId } };
-    return this.prismaService.friendRequest.findMany({ where });
+    return this.prismaService.friendRequest.findMany({ where :{sender:{id:userId}} });
   }
 
   async acceptFriendRequest(requestId: number) {

@@ -30,11 +30,8 @@ import { WebSocketExceptionsFilter } from './core/ws-exception.filter';
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
     },
-    {
-      provide: APP_FILTER,
-      useClass: WebSocketExceptionsFilter,
-    },
-    FriendRequestGateway,
+
+
   ],
   controllers: [],
 })
