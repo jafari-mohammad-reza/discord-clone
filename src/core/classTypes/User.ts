@@ -1,6 +1,16 @@
-import { User as UserType } from "@prisma/client/generated";
-import { IsBoolean, IsEmail, IsIP, IsNumber, IsOptional, IsString, IsUUID, Length, Matches } from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
+import { User as UserType } from '@prisma/client/generated';
+import {
+  IsBoolean,
+  IsEmail,
+  IsIP,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Length,
+  Matches,
+} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class User implements UserType {
   @IsBoolean()
@@ -9,9 +19,9 @@ export class User implements UserType {
   @IsEmail()
   @Matches(/^[a-z0-9](\.?[a-z0-9]){5,}@g(oogle)?mail\.com$/) // only accepts gmail and googlemail  domain
   @ApiProperty({
-    type: "email",
+    type: 'email',
     required: true,
-    name: "email"
+    name: 'email',
   })
   email: string;
   @IsUUID()
@@ -26,11 +36,11 @@ export class User implements UserType {
   @Matches(/^.*(?=.{6,})(?=.*[a-zA-Z])(?=.*\d)(?=.*[!&$%? "]).*$/)
   @Length(8, 16)
   @ApiProperty({
-    type: "string",
+    type: 'string',
     required: true,
     minLength: 8,
     maxLength: 16,
-    name: "password"
+    name: 'password',
   })
   password: string;
   @IsNumber()
@@ -38,11 +48,11 @@ export class User implements UserType {
   @IsString()
   @Length(4, 12)
   @ApiProperty({
-    type: "string",
+    type: 'string',
     required: true,
     minLength: 4,
     maxLength: 12,
-    name: "username"
+    name: 'username',
   })
   username: string;
   @IsNumber()

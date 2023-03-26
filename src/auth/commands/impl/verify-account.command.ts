@@ -1,4 +1,3 @@
 export class VerifyAccountCommand {
-  constructor(public readonly code: number) {
-  }
+  constructor(public readonly code: number) {}
 }

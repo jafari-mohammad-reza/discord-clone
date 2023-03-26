@@ -1,7 +1,7 @@
-import { Global, Module } from "@nestjs/common";
-import { MailService } from "./mail.service";
-import { MailerModule } from "@nestjs-modules/mailer";
-import { ConfigModule, ConfigService } from "@nestjs/config";
+import { Global, Module } from '@nestjs/common';
+import { MailService } from './mail.service';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Global()
 @Module({
@@ -12,21 +12,20 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         transport: {
-          service: "gmail",
-          from: "Discord-Clone",
+          service: 'gmail',
+          from: 'Discord-Clone',
           auth: {
-            user: configService.get("EMAIL_USER"),
-            pass: configService.get("EMAIL_PASSWORD")
-          }
+            user: configService.get('EMAIL_USER'),
+            pass: configService.get('EMAIL_PASSWORD'),
+          },
         },
         defaults: {
-          from: "Discord-Clone"
-        }
-      })
-    })
+          from: 'Discord-Clone',
+        },
+      }),
+    }),
   ],
   providers: [MailService],
-  exports: [MailService]
+  exports: [MailService],
 })
-export class MailModule {
-}
+export class MailModule {}

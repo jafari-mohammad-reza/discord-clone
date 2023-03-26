@@ -1,4 +1,4 @@
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException } from '@nestjs/common';
 
 export class AlreadyExistException extends BadRequestException {
   constructor(private readonly entity: string, private readonly field: string) {

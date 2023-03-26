@@ -1,13 +1,13 @@
-import { Channel as ChannelType } from "@prisma/client/generated";
-import { IsBoolean, IsString, IsUUID } from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
-import { Transform } from "class-transformer";
+import { Channel as ChannelType } from '@prisma/client/generated';
+import { IsBoolean, IsString, IsUUID } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class Channel implements ChannelType {
   id: string;
   @IsBoolean()
   @Transform(({ value }) => {
-    return value === "true" || value === true || value === 1 || value === "1";
+    return value === 'true' || value === true || value === 1 || value === '1';
   })
   @ApiProperty({ type: Boolean, required: true, default: true })
   isPublic: boolean;

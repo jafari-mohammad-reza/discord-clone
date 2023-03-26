@@ -8,8 +8,11 @@ import { TopicModule } from './topic/topic.module';
 import { CategoryModule } from './category/category.module';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './core/http-exception.filter';
-import { AuthMiddleware } from './auth/middleware/auth.middleware';
+import { AuthMiddleware } from './auth/auth.middleware';
 import { DeveloperModule } from './developer/developer.module';
+import { FriendRequestGateway } from './friend-request/friend-request.gateway';
+import { FriendRequestModule } from './friend-request/friend-request.module';
+import { WebSocketExceptionsFilter } from './core/ws-exception.filter';
 
 @Module({
   imports: [
@@ -20,12 +23,18 @@ import { DeveloperModule } from './developer/developer.module';
     CategoryModule,
     TopicModule,
     DeveloperModule,
+    FriendRequestModule,
   ],
   providers: [
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
     },
+    {
+      provide: APP_FILTER,
+      useClass: WebSocketExceptionsFilter,
+    },
+    FriendRequestGateway,
   ],
   controllers: [],
 })

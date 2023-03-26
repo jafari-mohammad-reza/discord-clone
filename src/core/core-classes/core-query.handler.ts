@@ -1,4 +1,4 @@
-import { IQueryHandler } from "@nestjs/cqrs";
+import { IQueryHandler } from '@nestjs/cqrs';
 
 export interface CoreQueryHandler extends IQueryHandler {
   readonly entity: string;
