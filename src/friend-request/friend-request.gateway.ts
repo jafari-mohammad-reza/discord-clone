@@ -77,12 +77,12 @@ export class FriendRequestGateway implements OnGatewayInit, OnGatewayConnection,
 
   @UseGuards(WsAuthGuard)
   @SubscribeMessage('rejectFriendRequest')
-  rejectFriendRequest(
-    @MessageBody('body') body: RejectFriendRequestDto,
+  async rejectFriendRequest(
+    @MessageBody() {requestId}: RejectFriendRequestDto,
     @ConnectedSocket() socket: Socket,
   ) {
     const userId = socket['user']?.id;
-    return 'Hello world!';
+    await this.firstRequestService.rejectFriendRequest(userId , requestId)
   }
 
   @UseGuards(WsAuthGuard)

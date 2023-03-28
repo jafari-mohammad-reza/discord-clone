@@ -1,1 +1,4 @@
-export class RejectFriendRequestDto {}
+import {IsNumber} from "class-validator";
+
+export class RejectFriendRequestDto {  @IsNumber()
+requestId:number}

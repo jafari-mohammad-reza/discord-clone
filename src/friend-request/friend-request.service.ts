@@ -55,8 +55,11 @@ export class FriendRequestService {
     }
   }
 
-  async rejectFriendRequest(requestId: number) {
+  async rejectFriendRequest(userId:string,requestId: number) {
     try {
+      if((await this.prismaService.friendRequest.findFirst({where:{id:requestId}})).receiverId !== userId){
+        throw new WsException(`your not allowed to accept this request`);
+      }
       await this.prismaService.friendRequest.delete({
         where: { id: requestId },
       });
