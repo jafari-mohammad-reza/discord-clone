@@ -1,8 +1,8 @@
-import { Injectable } from "@nestjs/common";
-import { ICommand, ofType, Saga } from "@nestjs/cqrs";
-import { map, Observable } from "rxjs";
-import { DeleteChannelEvent } from "./events/impl/delete-channel.event";
-import { NotifyUserCommand } from "./commands/impl/notify-user.command";
+import { Injectable } from '@nestjs/common';
+import { ICommand, ofType, Saga } from '@nestjs/cqrs';
+import { map, Observable } from 'rxjs';
+import { DeleteChannelEvent } from './events/impl/delete-channel.event';
+import { NotifyUserCommand } from './commands/impl/notify-user.command';
 
 @Injectable()
 export class ChannelSaga {
@@ -17,9 +17,9 @@ export class ChannelSaga {
           new NotifyUserCommand(
             event.members,
             event.channel.title,
-            "Channel removed and its not available no more"
-          )
-      )
+            'Channel removed and its not available no more',
+          ),
+      ),
     );
   };
 }

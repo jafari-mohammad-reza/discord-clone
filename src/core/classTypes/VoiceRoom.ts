@@ -1,6 +1,6 @@
-import { VoiceRoom as VoiceRoomType } from "@prisma/client/generated";
-import { IsString, IsUUID } from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
+import { VoiceRoom as VoiceRoomType } from '@prisma/client/generated';
+import { IsString, IsUUID } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class VoiceRoom implements VoiceRoomType {
   id: string;

@@ -1,4 +1,3 @@
 export class UpdateCategoryCommand {
-  constructor(public readonly id: string, public readonly title: string) {
-  }
+  constructor(public readonly id: string, public readonly title: string) {}
 }

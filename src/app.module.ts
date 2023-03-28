@@ -8,8 +8,9 @@ import { TopicModule } from './topic/topic.module';
 import { CategoryModule } from './category/category.module';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './core/http-exception.filter';
-import { AuthMiddleware } from './auth/middleware/auth.middleware';
+import { AuthMiddleware } from './auth/auth.middleware';
 import { DeveloperModule } from './developer/developer.module';
+import { FriendRequestModule } from './friend-request/friend-request.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { DeveloperModule } from './developer/developer.module';
     CategoryModule,
     TopicModule,
     DeveloperModule,
+    FriendRequestModule,
   ],
   providers: [
     {
