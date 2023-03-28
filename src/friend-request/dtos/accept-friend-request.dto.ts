@@ -1,5 +1,1 @@
-import {IsString} from "class-validator";
-
-export class AcceptFriendRequestDto{
-
-}
+export class AcceptFriendRequestDto {}

@@ -2,10 +2,12 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../core/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { WsException } from '@nestjs/websockets';
+
 export enum FriendRequestSearchBy {
   SENDER = 'sender',
   RECEIVER = 'receiver',
 }
+
 @Injectable()
 export class FriendRequestService {
   constructor(
@@ -18,7 +20,9 @@ export class FriendRequestService {
       searchBy === FriendRequestSearchBy.SENDER
         ? { sender: { id: userId } }
         : { receiver: { id: userId } };
-    return this.prismaService.friendRequest.findMany({ where :{sender:{id:userId}} });
+    return this.prismaService.friendRequest.findMany({
+      where: { sender: { id: userId } },
+    });
   }
 
   async acceptFriendRequest(requestId: number) {
@@ -57,27 +61,29 @@ export class FriendRequestService {
   async getUserFromToken(token: string) {
     try {
       const { email } = await this.jwtService.verifyAsync(token);
-      if (!email) throw new UnauthorizedException('Invalid token');
+      if (!email) throw new WsException('Invalid token');
       const user = await this.prismaService.user.findUnique({
         where: { email },
-        select: { id: true },
+        select: { id: true,username:true },
       });
-      if (!user) throw new UnauthorizedException('User not found');
+      if (!user) throw new WsException('User not found');
       return user;
     } catch (e) {
-      throw new UnauthorizedException(
+      throw new WsException(
         `Error getting user from token: ${e.message}`,
       );
     }
   }
 
   async sendFriendRequest(userId: string, targetUserName: string) {
-    const receiver = await this.prismaService.user.findFirst({
-      where: { username: targetUserName },
-    });
-    if (!receiver)
-      throw new WsException(`Receiver ${targetUserName} not found`);
+
     try {
+      const receiver = await this.prismaService.user.findFirst({
+        where: { username: targetUserName },
+      });
+      if (!receiver){
+        throw new WsException(`Receiver ${targetUserName} not found`);
+      }
       await this.prismaService.friendRequest.create({
         data: { senderId: userId, receiverId: receiver.id },
       });

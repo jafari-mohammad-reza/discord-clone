@@ -39,6 +39,7 @@ async function bootstrap() {
   });
   SwaggerModule.setup('api-docs', app, document);
   await app.listen(5000);
+  app.enableShutdownHooks();
 }
 
 bootstrap();

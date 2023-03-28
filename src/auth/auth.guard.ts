@@ -1,15 +1,9 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { map, Observable } from 'rxjs';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { from, map, Observable, of } from 'rxjs';
 import { Socket } from 'socket.io';
 import { WsException } from '@nestjs/websockets';
 import { PrismaService } from '../core/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import { from, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 @Injectable()
@@ -43,7 +37,7 @@ export class WsAuthGuard implements CanActivate {
         return from(
           this.prismaService.user.findUnique({
             where: { email },
-            select: { id: true },
+            select: { id: true ,username:true},
           }),
         ).pipe(
           map((user) => {

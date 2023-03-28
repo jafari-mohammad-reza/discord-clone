@@ -1,1 +1,1 @@
-export class RejectFriendRequestDto{}
+export class RejectFriendRequestDto {}
