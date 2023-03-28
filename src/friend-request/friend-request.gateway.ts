@@ -59,19 +59,20 @@ export class FriendRequestGateway implements OnGatewayInit, OnGatewayConnection,
     @ConnectedSocket() socket: Socket,
   ) {
     const userId = socket['user']?.id;
-    await this.firstRequestService.sendFriendRequest(userId,targetUserName)
-    this._server.to(this._connectedSockets.get(targetUserName)).emit("receiveFriendRequest" , {sender:socket['user']?.username , date:new Date().getDate()})
+    const {id} = await this.firstRequestService.sendFriendRequest(userId,targetUserName)
+    this._server.to(this._connectedSockets.get(targetUserName)).emit("receivedFriendRequest" , {sender:socket['user']?.username , requestId:id})
     return 'Hello world!';
   }
 
   @UseGuards(WsAuthGuard)
   @SubscribeMessage('acceptFriendRequest')
-  acceptFriendRequest(
-    @MessageBody('body') body: AcceptFriendRequestDto,
+  async acceptFriendRequest(
+    @MessageBody() {requestId}: AcceptFriendRequestDto,
     @ConnectedSocket() socket: Socket,
   ) {
     const userId = socket['user']?.id;
-    return 'Hello world!';
+    const {sender,receiver} = await this.firstRequestService.acceptFriendRequest(userId , requestId)
+    this._server.to(this._connectedSockets.get(sender)).emit("acceptedFriendRequest" , {msg:`${receiver} accepted your request`})
   }
 
   @UseGuards(WsAuthGuard)
@@ -90,10 +91,13 @@ export class FriendRequestGateway implements OnGatewayInit, OnGatewayConnection,
     @ConnectedSocket() socket: Socket,
   ): Promise<FriendRequest[]> {
     const userId = socket['user']?.id;
-    return this.firstRequestService.getFriendRequests(
-      userId,
-      FriendRequestSearchBy.RECEIVER,
+    const data = await this.firstRequestService.getFriendRequests(
+        userId,
+        FriendRequestSearchBy.RECEIVER,
     );
+    console.log(data)
+    this._server.to(socket.id).emit("getReceivedFriendRequest" , data)
+    return data
   }
 
   @UseGuards(WsAuthGuard)
@@ -102,9 +106,11 @@ export class FriendRequestGateway implements OnGatewayInit, OnGatewayConnection,
     @ConnectedSocket() socket: Socket,
   ): Promise<FriendRequest[]> {
     const userId = socket['user']?.id;
-    return this.firstRequestService.getFriendRequests(
-      userId,
-      FriendRequestSearchBy.SENDER,
+    const data = await this.firstRequestService.getFriendRequests(
+        userId,
+        FriendRequestSearchBy.SENDER,
     );
+    this._server.to(socket.id).emit("getSentFriendRequest" , data)
+    return data
   }
 }
