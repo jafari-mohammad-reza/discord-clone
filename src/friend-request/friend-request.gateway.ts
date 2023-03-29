@@ -6,7 +6,7 @@ import {
   OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
-  WebSocketServer,
+  WebSocketServer, WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { WsAuthGuard } from '../auth/auth.guard';
@@ -19,71 +19,41 @@ import {
 } from './friend-request.service';
 import { FriendRequest } from '@prisma/client/generated';
 import { Logger, UseGuards } from '@nestjs/common';
+import { CoreGateway } from '../core/core.gateway';
+import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 
 @WebSocketGateway({ serveClient: false, cors: { origin: '*' } })
-export class FriendRequestGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
-  @WebSocketServer() private _server: Server;
-  private _connectedSockets;
-  private _logger: Logger;
+export class FriendRequestGateway extends CoreGateway implements OnGatewayInit {
+  private _FriendRequestLogger: Logger;
 
-  constructor(private readonly firstRequestService: FriendRequestService) {
-    this._server = new Server();
-    this._connectedSockets = new Map();
-    this._logger = new Logger(FriendRequestGateway.name);
+  constructor(private readonly friendRequestService: FriendRequestService) {
+    super();
+    this._FriendRequestLogger = new Logger(FriendRequestGateway.name);
   }
-
-  afterInit(server: Server) {
-    this._logger.log('FriendRequestGateway Initialized');
+  afterInit(server: any): any {
+    this._FriendRequestLogger.log('FriendRequestGateway Initialized');
   }
-
-  handleConnection(client: Socket) {
-    if (!client.handshake.headers.authorization) {
-      return client.disconnect();
-    }
-    this.firstRequestService
-      .getUserFromToken(client.handshake.headers.authorization)
-      .then((user) => {
-        this._connectedSockets.set(user.username, client.id);
-      })
-      .catch((err) => {
-        this._logger.log(err);
-        client.disconnect();
-      });
-  }
-
-  handleDisconnect(client: Socket) {
-    this.firstRequestService
-      .getUserFromToken(client.handshake.headers.authorization)
-      .then((user) => {
-        if (this._connectedSockets.has(user.username)) {
-          this._connectedSockets.delete(user.username);
-        }
-      })
-      .catch((err) => {
-        client.disconnect();
-      });
-  }
-
   @UseGuards(WsAuthGuard)
   @SubscribeMessage('sendFriendRequest')
   async sendFriendRequest(
     @MessageBody() { targetUserName }: SendFriendRequestDto,
     @ConnectedSocket() socket: Socket,
   ) {
-    const userId = socket['user']?.id;
-    const { id } = await this.firstRequestService.sendFriendRequest(
-      userId,
-      targetUserName,
-    );
-    this._server
-      .to(this._connectedSockets.get(targetUserName))
-      .emit('receivedFriendRequest', {
-        sender: socket['user']?.username,
-        requestId: id,
-      });
-    return 'Hello world!';
+    try {
+      const userId = socket['user']?.id;
+      const { id } = await this.friendRequestService.sendFriendRequest(
+        userId,
+        targetUserName,
+      );
+      this._server
+        .to(this._connectedSockets.get(targetUserName))
+        .emit('receivedFriendRequest', {
+          sender: socket['user']?.username,
+          requestId: id,
+        });
+    } catch (err) {
+      this._FriendRequestLogger.error(err);
+    }
   }
 
   @UseGuards(WsAuthGuard)
@@ -92,14 +62,18 @@ export class FriendRequestGateway
     @MessageBody() { requestId }: AcceptFriendRequestDto,
     @ConnectedSocket() socket: Socket,
   ) {
-    const userId = socket['user']?.id;
-    const { sender, receiver } =
-      await this.firstRequestService.acceptFriendRequest(userId, requestId);
-    this._server
-      .to(this._connectedSockets.get(sender))
-      .emit('acceptedFriendRequest', {
-        msg: `${receiver} accepted your request`,
-      });
+    try {
+      const userId = socket['user']?.id;
+      const { sender, receiver } =
+        await this.friendRequestService.acceptFriendRequest(userId, requestId);
+      this._server
+        .to(this._connectedSockets.get(sender))
+        .emit('acceptedFriendRequest', {
+          msg: `${receiver} accepted your request`,
+        });
+    } catch (err) {
+      this._FriendRequestLogger.error(err);
+    }
   }
 
   @UseGuards(WsAuthGuard)
@@ -108,8 +82,12 @@ export class FriendRequestGateway
     @MessageBody() { requestId }: RejectFriendRequestDto,
     @ConnectedSocket() socket: Socket,
   ) {
-    const userId = socket['user']?.id;
-    await this.firstRequestService.rejectFriendRequest(userId, requestId);
+    try {
+      const userId = socket['user']?.id;
+      await this.friendRequestService.rejectFriendRequest(userId, requestId);
+    } catch (err) {
+      this._FriendRequestLogger.error(err);
+    }
   }
 
   @UseGuards(WsAuthGuard)
@@ -117,14 +95,18 @@ export class FriendRequestGateway
   async getReceivedFriendRequest(
     @ConnectedSocket() socket: Socket,
   ): Promise<FriendRequest[]> {
-    const userId = socket['user']?.id;
-    const data = await this.firstRequestService.getFriendRequests(
-      userId,
-      FriendRequestSearchBy.RECEIVER,
-    );
-    this._logger.log(data);
-    this._server.to(socket.id).emit('getReceivedFriendRequest', data);
-    return data;
+    try {
+      const userId = socket['user']?.id;
+      const data = await this.friendRequestService.getFriendRequests(
+        userId,
+        FriendRequestSearchBy.RECEIVER,
+      );
+      this._FriendRequestLogger.log(data);
+      this._server.to(socket.id).emit('getReceivedFriendRequest', data);
+      return data;
+    } catch (err) {
+      this._FriendRequestLogger.error(err);
+    }
   }
 
   @UseGuards(WsAuthGuard)
@@ -132,12 +114,16 @@ export class FriendRequestGateway
   async getSentFriendRequestHandler(
     @ConnectedSocket() socket: Socket,
   ): Promise<FriendRequest[]> {
-    const userId = socket['user']?.id;
-    const data = await this.firstRequestService.getFriendRequests(
-      userId,
-      FriendRequestSearchBy.SENDER,
-    );
-    this._server.to(socket.id).emit('getSentFriendRequest', data);
-    return data;
+    try {
+      const userId = socket['user']?.id;
+      const data = await this.friendRequestService.getFriendRequests(
+        userId,
+        FriendRequestSearchBy.SENDER,
+      );
+      this._server.to(socket.id).emit('getSentFriendRequest', data);
+      return data;
+    } catch (err) {
+      this._FriendRequestLogger.error(err);
+    }
   }
 }

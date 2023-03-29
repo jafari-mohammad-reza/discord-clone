@@ -12,6 +12,7 @@ import { AuthMiddleware } from './auth/auth.middleware';
 import { DeveloperModule } from './developer/developer.module';
 import { FriendRequestModule } from './friend-request/friend-request.module';
 import { DirectMessageModule } from './direct-message/direct-message.module';
+import { WebSocketExceptionsFilter } from './core/ws-exception.filter';
 
 @Module({
   imports: [
@@ -29,6 +30,10 @@ import { DirectMessageModule } from './direct-message/direct-message.module';
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: WebSocketExceptionsFilter,
     },
   ],
   controllers: [],

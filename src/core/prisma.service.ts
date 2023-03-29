@@ -1,9 +1,11 @@
 import { INestApplication, Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client/generated';
 import { genSaltSync, hashSync } from 'bcrypt';
+import { WsException } from '@nestjs/websockets';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit {
+export class PrismaService extends PrismaClient implements OnModuleInit  {
   async onModuleInit() {
     await this.$connect();
     this.$use(async (params, next) => {
@@ -26,5 +28,23 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     this.$on('beforeExit', async () => {
       await app.close();
     });
+  }
+  async getUserFromToken(token: string) {
+    try {
+      const jwtService = new JwtService({
+        secret: process.env.JWT_SECRET,
+        signOptions: { expiresIn: '7d' },
+      });
+      const { email } = await jwtService.verifyAsync(token);
+      if (!email) throw new WsException('Invalid token');
+      const user = await this.user.findUnique({
+        where: { email },
+        select: { id: true, username: true },
+      });
+      if (!user) throw new WsException('User not found');
+      return user;
+    } catch (e) {
+      console.log(e);
+    }
   }
 }

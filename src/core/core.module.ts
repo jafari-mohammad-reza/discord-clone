@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaService } from './prisma.service';
 import { DropBoxModule } from '../drop-box/drop-box.module';
+import { CoreGateway } from './core.gateway';
 
 @Global()
 @Module({
@@ -33,7 +34,7 @@ import { DropBoxModule } from '../drop-box/drop-box.module';
       global: true,
     },
   ],
-  providers: [PrismaService],
+  providers: [PrismaService, CoreGateway],
   exports: [JwtModule, PrismaService],
 })
 export class CoreModule {}

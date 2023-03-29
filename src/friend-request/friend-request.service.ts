@@ -34,9 +34,9 @@ export class FriendRequestService {
       },
     });
     if (!request)
-      throw new WsException(`Friend request ${requestId} not found`);
+      throw new Error(`Friend request ${requestId} not found`);
     if (request.receiverId !== userId) {
-      throw new WsException(`your not allowed to accept this request`);
+      throw new Error(`your not allowed to accept this request`);
     }
     try {
       await Promise.all([
@@ -56,7 +56,7 @@ export class FriendRequestService {
       };
     } catch (e) {
       console.log(e);
-      throw new WsException(`Error accepting friend request: ${e.message}`);
+      throw new Error(`Error accepting friend request: ${e.message}`);
     }
   }
 
@@ -69,30 +69,14 @@ export class FriendRequestService {
           })
         ).receiverId !== userId
       ) {
-        throw new WsException(`your not allowed to accept this request`);
+        throw new Error(`your not allowed to accept this request`);
       }
       await this.prismaService.friendRequest.delete({
         where: { id: requestId },
       });
     } catch (e) {
       console.log(e);
-      throw new WsException(`Error rejecting friend request: ${e.message}`);
-    }
-  }
-
-  async getUserFromToken(token: string) {
-    try {
-      const { email } = await this.jwtService.verifyAsync(token);
-      if (!email) throw new WsException('Invalid token');
-      const user = await this.prismaService.user.findUnique({
-        where: { email },
-        select: { id: true, username: true },
-      });
-      if (!user) throw new WsException('User not found');
-      return user;
-    } catch (e) {
-      console.log(e);
-      throw new WsException(`Error getting user from token: ${e.message}`);
+      throw new Error(`Error rejecting friend request: ${e.message}`);
     }
   }
 
@@ -104,14 +88,14 @@ export class FriendRequestService {
       });
 
       if (!receiver) {
-        throw new WsException(`Receiver ${targetUserName} not found`);
+        throw new Error(`Receiver ${targetUserName} not found`);
       }
       if (
         receiver.receivedFriendRequests.find(
           (friendRequest) => friendRequest.senderId === userId,
         )
       ) {
-        throw new WsException(`You can not send request to this user again`);
+        throw new Error(`You can not send request to this user again`);
       }
       const createdRequest = await this.prismaService.friendRequest.create({
         data: { senderId: userId, receiverId: receiver.id },
@@ -129,7 +113,7 @@ export class FriendRequestService {
       return createdRequest;
     } catch (e) {
       console.log(e);
-      throw new WsException(`Error sending friend request: ${e.message}`);
+      throw new Error(`Error sending friend request: ${e.message}`);
     }
   }
 }

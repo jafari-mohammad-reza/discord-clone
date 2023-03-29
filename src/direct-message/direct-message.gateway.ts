@@ -10,22 +10,24 @@ import {
 } from '@nestjs/websockets';
 import { DirectMessageService } from './direct-message.service';
 import { Server, Socket } from 'socket.io';
-import { Logger, UseGuards } from '@nestjs/common';
+import {Logger, OnModuleInit, UseGuards} from '@nestjs/common';
 import { WsAuthGuard } from '../auth/auth.guard';
 import { AcceptFriendRequestDto } from '../friend-request/dtos/accept-friend-request.dto';
 import { SendMessageDto } from './dtos/send-message.dto';
+import {CoreGateway} from "../core/core.gateway";
 
 @WebSocketGateway()
-export class DirectMessageGateway implements OnGatewayInit {
-  @WebSocketServer() private _server: Server;
-  private _logger: Logger;
+export class DirectMessageGateway  extends CoreGateway implements OnGatewayInit {
+  private _DirectMessageGatewayLogger: Logger;
 
   constructor(private readonly directMessageService: DirectMessageService) {
-    this._server = new Server();
-    this._logger = new Logger(DirectMessageGateway.name);
+    super();
+    this._DirectMessageGatewayLogger = new Logger(DirectMessageGateway.name);
   }
+
+
   afterInit(server: any): any {
-    this._logger.log('DirectMessageGateway Initialized');
+    this._DirectMessageGatewayLogger.log('DirectMessageGateway Initialized');
   }
   @UseGuards(WsAuthGuard)
   @SubscribeMessage('sendMessage')
