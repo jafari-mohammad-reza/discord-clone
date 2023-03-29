@@ -19,7 +19,8 @@ model User {
   joinedChannels           Channel[]       @relation("JoinedChannels")
   createdChannels          Channel[]       @relation("CreatedChannels")
   UserOnChannel            UserOnChannel[]
-  messages                 Message[]
+  sentMessages             Message[]       @relation("sentMessages")
+  receivedMessages         Message[]       @relation("receivedMessages")
   VoiceRoom                VoiceRoom?      @relation(fields: [voiceRoomId], references: [id], onDelete: SetNull)
   voiceRoomId              String?
   IsVerified               Boolean         @default(false)
@@ -96,8 +97,10 @@ model VoiceRoom {
 
 model Message {
   id                Int                 @id @default(autoincrement())
-  author            User                @relation(fields: [authorId], references: [id])
+  author            User                @relation("sentMessages", fields: [authorId], references: [id])
   authorId          String
+  receiver          User?               @relation("receivedMessages", fields: [receiverId], references: [id])
+  receiverId        String?
   content           String
   sentAt            DateTime            @default(now())
   reactions         Reaction[]

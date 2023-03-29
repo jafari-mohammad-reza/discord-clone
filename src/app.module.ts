@@ -11,6 +11,7 @@ import { HttpExceptionFilter } from './core/http-exception.filter';
 import { AuthMiddleware } from './auth/auth.middleware';
 import { DeveloperModule } from './developer/developer.module';
 import { FriendRequestModule } from './friend-request/friend-request.module';
+import { DirectMessageModule } from './direct-message/direct-message.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { FriendRequestModule } from './friend-request/friend-request.module';
     TopicModule,
     DeveloperModule,
     FriendRequestModule,
+    DirectMessageModule,
   ],
   providers: [
     {

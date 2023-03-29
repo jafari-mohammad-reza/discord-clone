@@ -37,7 +37,7 @@ export class WsAuthGuard implements CanActivate {
         return from(
           this.prismaService.user.findUnique({
             where: { email },
-            select: { id: true ,username:true},
+            select: { id: true, username: true },
           }),
         ).pipe(
           map((user) => {

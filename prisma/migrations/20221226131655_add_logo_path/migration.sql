@@ -1,2 +1,3 @@
 -- AlterTable
-ALTER TABLE "Channel" ADD COLUMN     "logoPath" TEXT;
+ALTER TABLE "Channel"
+    ADD COLUMN "logoPath" TEXT;

@@ -1,2 +1,3 @@
 -- AlterTable
-ALTER TABLE "User" ADD COLUMN     "lastLoginIpAddress" TEXT;
+ALTER TABLE "User"
+    ADD COLUMN "lastLoginIpAddress" TEXT;
