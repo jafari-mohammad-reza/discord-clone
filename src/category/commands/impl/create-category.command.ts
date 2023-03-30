@@ -1,3 +1,4 @@
 export class CreateCategoryCommand {
-  constructor(public readonly title: string) {}
+    constructor(public readonly title: string) {
+    }
 }

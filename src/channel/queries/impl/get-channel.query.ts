@@ -1,3 +1,4 @@
 export class GetChannelQuery {
-  constructor(public readonly identifier?: string) {}
+    constructor(public readonly identifier?: string) {
+    }
 }
