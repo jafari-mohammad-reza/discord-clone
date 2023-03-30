@@ -7,12 +7,12 @@ import { CoreModule } from './core/core.module';
 import { TopicModule } from './topic/topic.module';
 import { CategoryModule } from './category/category.module';
 import { APP_FILTER } from '@nestjs/core';
-import { HttpExceptionFilter } from './core/http-exception.filter';
+import { HttpExceptionFilter } from './core/filters/http-exception.filter';
 import { AuthMiddleware } from './auth/auth.middleware';
 import { DeveloperModule } from './developer/developer.module';
 import { FriendRequestModule } from './friend-request/friend-request.module';
 import { DirectMessageModule } from './direct-message/direct-message.module';
-import { WebSocketExceptionsFilter } from './core/ws-exception.filter';
+import { WebSocketExceptionsFilter } from './core/filters/ws-exception.filter';
 
 @Module({
   imports: [

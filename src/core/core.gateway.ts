@@ -1,16 +1,17 @@
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
-  SubscribeMessage,
-  WebSocketGateway, WebSocketServer,
+  WebSocketGateway,
+  WebSocketServer,
 } from '@nestjs/websockets';
-import {Logger, OnModuleDestroy} from '@nestjs/common';
-import {Server, Socket} from 'socket.io';
+import { Logger, OnModuleDestroy } from '@nestjs/common';
+import { Server, Socket } from 'socket.io';
 import { PrismaService } from './prisma.service';
-import { JwtService } from '@nestjs/jwt';
 
 @WebSocketGateway()
-export class CoreGateway implements OnGatewayConnection, OnGatewayDisconnect , OnModuleDestroy {
+export class CoreGateway
+  implements OnGatewayConnection, OnGatewayDisconnect, OnModuleDestroy
+{
   @WebSocketServer() protected _server: Server;
   private _logger: Logger;
   protected _prismaService: PrismaService;
@@ -49,6 +50,6 @@ export class CoreGateway implements OnGatewayConnection, OnGatewayDisconnect , O
       });
   }
   onModuleDestroy(): any {
-    this._connectedSockets.clear()
+    this._connectedSockets.clear();
   }
 }

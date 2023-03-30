@@ -19,8 +19,6 @@ model User {
   joinedChannels           Channel[]       @relation("JoinedChannels")
   createdChannels          Channel[]       @relation("CreatedChannels")
   UserOnChannel            UserOnChannel[]
-  sentMessages             Message[]       @relation("sentMessages")
-  receivedMessages         Message[]       @relation("receivedMessages")
   VoiceRoom                VoiceRoom?      @relation(fields: [voiceRoomId], references: [id], onDelete: SetNull)
   voiceRoomId              String?
   IsVerified               Boolean         @default(false)
@@ -30,6 +28,8 @@ model User {
   lastLoginIpAddress       String?
   sentFriendRequests       FriendRequest[] @relation("sentFriendRequests")
   receivedFriendRequests   FriendRequest[] @relation("receivedFriendRequests")
+  Messages                 Message[]
+  chats                    Chat[]
 }
 
 model Channel {
@@ -97,16 +97,23 @@ model VoiceRoom {
 
 model Message {
   id                Int                 @id @default(autoincrement())
-  author            User                @relation("sentMessages", fields: [authorId], references: [id])
+  author            User                @relation(fields: [authorId], references: [id])
   authorId          String
-  receiver          User?               @relation("receivedMessages", fields: [receiverId], references: [id])
-  receiverId        String?
   content           String
   sentAt            DateTime            @default(now())
   reactions         Reaction[]
   MessageOnReaction MessageOnReaction[]
   TextRoom          TextRoom?           @relation(fields: [textRoomId], references: [id])
   textRoomId        String?
+  Chat              Chat?               @relation(fields: [chatId], references: [id])
+  chatId            Int?
+}
+
+model Chat {
+  id           Int       @id @default(autoincrement())
+  messages     Message[]
+  creationDate DateTime  @default(now())
+  users        User[]
 }
 
 model Reaction {

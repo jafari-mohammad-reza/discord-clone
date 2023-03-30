@@ -5,7 +5,7 @@ import { WsException } from '@nestjs/websockets';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit  {
+export class PrismaService extends PrismaClient implements OnModuleInit {
   async onModuleInit() {
     await this.$connect();
     this.$use(async (params, next) => {

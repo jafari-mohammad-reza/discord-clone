@@ -81,6 +81,7 @@ services:
       depends_on:
         - postgres
         - elastic-search
+        - kibana
       environment:
         - ELASTICSEARCH_NODE=http://elastic-search:9200
         - DATABASE_URL=postgresql://admin:admin@postgres/discord?schema=public

@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../core/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import { WsException } from '@nestjs/websockets';
 
 export enum FriendRequestSearchBy {
   SENDER = 'sender',
@@ -10,10 +9,7 @@ export enum FriendRequestSearchBy {
 
 @Injectable()
 export class FriendRequestService {
-  constructor(
-    private readonly prismaService: PrismaService,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   async getFriendRequests(userId: string, searchBy: FriendRequestSearchBy) {
     const where =
@@ -33,8 +29,7 @@ export class FriendRequestService {
         receiver: { select: { username: true } },
       },
     });
-    if (!request)
-      throw new Error(`Friend request ${requestId} not found`);
+    if (!request) throw new Error(`Friend request ${requestId} not found`);
     if (request.receiverId !== userId) {
       throw new Error(`your not allowed to accept this request`);
     }
@@ -103,11 +98,11 @@ export class FriendRequestService {
       await Promise.all([
         this.prismaService.user.update({
           where: { id: userId },
-          data: { sentFriendRequests: { set: { id: createdRequest.id } } },
+          data: { sentFriendRequests: {connect: { id: createdRequest.id } } },
         }),
         this.prismaService.user.update({
           where: { id: receiver.id },
-          data: { receivedFriendRequests: { set: { id: createdRequest.id } } },
+          data: { receivedFriendRequests: { connect: { id: createdRequest.id } } },
         }),
       ]);
       return createdRequest;

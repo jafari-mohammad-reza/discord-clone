@@ -1,14 +1,11 @@
 import {
   ConnectedSocket,
   MessageBody,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
   OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
-  WebSocketServer, WsException,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Socket } from 'socket.io';
 import { WsAuthGuard } from '../auth/auth.guard';
 import { SendFriendRequestDto } from './dtos/send-friend-request.dto';
 import { AcceptFriendRequestDto } from './dtos/accept-friend-request.dto';
@@ -20,7 +17,6 @@ import {
 import { FriendRequest } from '@prisma/client/generated';
 import { Logger, UseGuards } from '@nestjs/common';
 import { CoreGateway } from '../core/core.gateway';
-import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 
 @WebSocketGateway({ serveClient: false, cors: { origin: '*' } })
 export class FriendRequestGateway extends CoreGateway implements OnGatewayInit {
@@ -59,7 +55,7 @@ export class FriendRequestGateway extends CoreGateway implements OnGatewayInit {
   @UseGuards(WsAuthGuard)
   @SubscribeMessage('acceptFriendRequest')
   async acceptFriendRequest(
-    @MessageBody() { requestId }: AcceptFriendRequestDto,
+      @MessageBody() { requestId }: AcceptFriendRequestDto,
     @ConnectedSocket() socket: Socket,
   ) {
     try {
