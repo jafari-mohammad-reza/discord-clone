@@ -35,6 +35,16 @@ export class DirectMessageGateway extends CoreGateway implements OnGatewayInit {
     @SubscribeMessage('getMessages')
     async getMessages(@ConnectedSocket() socket: Socket) {
         const userId = socket['user']?.id;
-        await this.directMessageService.getMessages(userId);
+        const messages = await this.directMessageService.getMessages(userId);
+        socket.emit("sentMessages" , messages)
+
+    }
+    @UseGuards(WsAuthGuard)
+    @UseFilters(new WebSocketExceptionsFilter())
+    @SubscribeMessage('getChats')
+    async getChats(@ConnectedSocket() socket: Socket) {
+        const userId = socket['user']?.id;
+        const chats = await this.directMessageService.getChats(userId);
+        socket.emit("existChats" , chats)
     }
 }

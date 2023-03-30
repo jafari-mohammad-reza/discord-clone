@@ -24,6 +24,10 @@ export class DirectMessageService {
     }
 
     async getMessages(userId: string) {
+        return await this.prismaService.message.findMany({where:{author: {id:userId}}})
+    }
+    async getChats(userId: string) {
+        return await this.prismaService.chat.findMany({where:{users:{some:{id:userId}}}})
     }
 
     private async findReceiver(receiverUsername: string) {
