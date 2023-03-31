@@ -1,9 +1,8 @@
-import {CreateChannelDto} from '../../dtos/create-channel.dto';
+import { CreateChannelDto } from '../../dtos/create-channel.dto';
 
 export class CreateChannelCommand {
-    constructor(
-        public readonly createChannelDto: CreateChannelDto,
-        public readonly ownerId: string,
-    ) {
-    }
+  constructor(
+    public readonly createChannelDto: CreateChannelDto,
+    public readonly ownerId: string,
+  ) {}
 }
