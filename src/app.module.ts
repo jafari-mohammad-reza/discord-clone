@@ -12,7 +12,7 @@ import { AuthMiddleware } from './auth/auth.middleware';
 import { DeveloperModule } from './developer/developer.module';
 import { FriendRequestModule } from './friend-request/friend-request.module';
 import { DirectMessageModule } from './direct-message/direct-message.module';
-import { TextChannelModule } from './text-channel/text-channel.module';
+import { textRoomModule } from './text-room/text-channel.module';
 
 @Module({
   imports: [
@@ -25,7 +25,7 @@ import { TextChannelModule } from './text-channel/text-channel.module';
     DeveloperModule,
     FriendRequestModule,
     DirectMessageModule,
-    TextChannelModule,
+    textRoomModule,
   ],
   providers: [
     {
