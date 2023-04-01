@@ -16,11 +16,8 @@ export class WsValidMemberGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): Observable<boolean> {
     const client: Socket = context.switchToWs().getClient();
-    const data = context.switchToWs().getData();
 
-    const token = client.handshake.headers.authorization;
-    const channelId = data.channelId;
-
+    const { authorization:token ,channelid:channelId } = client.handshake.headers;
     if (!token || !channelId) {
       throw new WsException('Please insert token and channelId');
     }
@@ -46,7 +43,7 @@ export class WsValidMemberGuard implements CanActivate {
 
             return from(
               this.prismaService.channel.findFirst({
-                where: { id: channelId },
+                where: { id: channelId.toString() },
                 include: { members: true },
               }),
             ).pipe(
@@ -54,7 +51,6 @@ export class WsValidMemberGuard implements CanActivate {
                 if (!channel) {
                   throw new WsException('Channel Not Exist');
                 }
-
                 return (
                   !!channel.members.find((member) => member.id === user.id) ||
                   channel.ownerId === user.id

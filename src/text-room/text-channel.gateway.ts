@@ -11,13 +11,14 @@ import { Socket } from 'socket.io';
 import { WsAuthGuard } from '../auth/auth.guard';
 import { WsValidMemberGuard } from '../channel/ws-valid-member.guard';
 import { WsValidOwnerGuard } from '../channel/ws-valid-owner.guard';
-import { textRoomService } from './text-channel.service';
+import { TextRoomService } from './text-channel.service';
 import { CreateTextRoomDto } from './dtos/create-text-room.dto';
 import {GetTextRoomDto} from "./dtos/get-text-room.dto";
+import {SendMessageDto} from "./dtos/send-message.dto";
 @WebSocketGateway()
 export class textRoomGateway extends CoreGateway implements OnGatewayInit {
   private readonly _textRoomLogger: Logger;
-  constructor(private readonly textRoomService: textRoomService) {
+  constructor(private readonly textRoomService: TextRoomService) {
     super();
     this._textRoomLogger = new Logger(textRoomGateway.name);
   }
@@ -48,8 +49,15 @@ export class textRoomGateway extends CoreGateway implements OnGatewayInit {
   }
   @UseGuards(WsValidMemberGuard)
   @SubscribeMessage('sendTextMessage')
-  sendTextMessage(@MessageBody() body, @ConnectedSocket() client: Socket) {}
+  async sendTextMessage(@MessageBody() {textRoomId,content}:SendMessageDto, @ConnectedSocket() client: Socket) {
+    const userId = client['user']?.id
+    const message = await this.textRoomService.sendTextMessage(userId,content,textRoomId)
+    this._server.to(textRoomId).emit("newMessage" , message)
+  }
   @UseGuards(WsValidOwnerGuard)
   @SubscribeMessage('deleteTextMessage')
-  deleteTextMessage(@MessageBody() body, @ConnectedSocket() client: Socket) {}
+  async deleteTextMessage(@MessageBody() {messageId}, @ConnectedSocket() client: Socket) {
+    const {textRoomId,id,} = await this.textRoomService.deleteTextMessage(messageId)
+    this._server.to(textRoomId).emit("messageDeleted" , id)
+  }
 }

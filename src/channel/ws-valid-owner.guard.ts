@@ -18,10 +18,10 @@ export class WsValidOwnerGuard implements CanActivate {
     const client: Socket = context.switchToWs().getClient();
     const data = context.switchToWs().getData();
 
-    const token = client.handshake.headers.authorization;
-    const channelId = data.channelId;
+      const { authorization:token ,channelid:channelId } = client.handshake.headers;
 
-    if (!token || !channelId) {
+
+      if (!token || !channelId) {
       throw new WsException('Please insert token and channelId');
     }
 
@@ -46,7 +46,7 @@ export class WsValidOwnerGuard implements CanActivate {
 
             return from(
               this.prismaService.channel.findFirst({
-                where: { id: channelId },
+                where: { id: channelId.toString() },
                 include: { members: true },
               }),
             ).pipe(
