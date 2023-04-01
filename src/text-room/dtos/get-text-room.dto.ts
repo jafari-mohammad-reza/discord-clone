@@ -1,6 +1,6 @@
-import {IsString} from "class-validator";
+import {IsString} from 'class-validator';
 
-export class GetTextRoomDto{
+export class GetTextRoomDto {
     @IsString()
-    textRoomId:string;
+    textRoomId: string;
 }

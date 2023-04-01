@@ -1,10 +1,10 @@
-import { IsNumber, IsString } from 'class-validator';
+import {IsNumber, IsString} from 'class-validator';
 
 export class CreateTextRoomDto {
-  @IsString()
-  channelId: string;
-  @IsString()
-  textRoomName: string;
-  @IsNumber()
-  topicId: number;
+    @IsString()
+    channelId: string;
+    @IsString()
+    textRoomName: string;
+    @IsNumber()
+    topicId: number;
 }
