@@ -4,6 +4,7 @@
 .env
 # Logs
 .vscode/
+.fleet
 logs
 *.log
 npm-debug.log*
