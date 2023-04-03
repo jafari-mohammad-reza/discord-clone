@@ -13,7 +13,7 @@ import {DeveloperModule} from './developer/developer.module';
 import {FriendRequestModule} from './friend-request/friend-request.module';
 import {DirectMessageModule} from './direct-message/direct-message.module';
 import {textRoomModule} from './text-room/text-room.module';
-import { VoiceRoomModule } from './voice-room/voice-room.module';
+import {VoiceRoomModule} from './voice-room/voice-room.module';
 
 @Module({
     imports: [

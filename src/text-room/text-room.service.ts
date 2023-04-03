@@ -1,9 +1,8 @@
 import {Injectable} from '@nestjs/common';
 
 import {CreateTextRoomDto} from './dtos/create-text-room.dto';
-import {PrismaService} from "../core/prisma.service";
-import {TextRoom} from "@prisma/client/generated";
-
+import {PrismaService} from '../core/prisma.service';
+import {TextRoom} from '@prisma/client/generated';
 
 @Injectable()
 export class TextRoomService {
@@ -48,7 +47,9 @@ export class TextRoomService {
     }
 
     async getExistTextRoom(textRoomId: string): Promise<TextRoom> {
-        return await this.prismaService.textRoom.findUnique({where: {id: textRoomId}});
+        return await this.prismaService.textRoom.findUnique({
+            where: {id: textRoomId},
+        });
     }
 
     async sendTextMessage(userId: string, content: string, textRoomId: string) {

@@ -1,8 +1,11 @@
-import {PickType} from "@nestjs/mapped-types";
-import {VoiceRoom} from "../../core/classTypes/VoiceRoom";
-import {IsString} from "class-validator";
+import {PickType} from '@nestjs/mapped-types';
+import {VoiceRoom} from '../../core/classTypes/VoiceRoom';
+import {IsString} from 'class-validator';
 
-export class CreateVoiceRoomDto extends PickType(VoiceRoom,['name' , 'topicId']){
+export class CreateVoiceRoomDto extends PickType(VoiceRoom, [
+    'name',
+    'topicId',
+]) {
     @IsString()
-    channelId:string;
+    channelId: string;
 }
