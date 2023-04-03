@@ -1,11 +1,13 @@
 import {Injectable} from '@nestjs/common';
-import {PrismaService} from '../core/prisma.service';
+
 import {CreateTextRoomDto} from './dtos/create-text-room.dto';
-import {TextRoom} from '@prisma/client/generated';
+import {PrismaService} from "../core/prisma.service";
+import {TextRoom} from "@prisma/client/generated";
+
 
 @Injectable()
 export class TextRoomService {
-    constructor(private readonly prisma: PrismaService) {
+    constructor(private readonly prismaService: PrismaService) {
     }
 
     async createTextRoom({
@@ -13,7 +15,7 @@ export class TextRoomService {
                              channelId,
                              topicId,
                          }: CreateTextRoomDto): Promise<{ newTextRoom: TextRoom }> {
-        const channel = await this.prisma.channel.findUnique({
+        const channel = await this.prismaService.channel.findUnique({
             where: {id: channelId},
             include: {Topics: {where: {id: topicId}, select: {id: true}}},
         });
@@ -28,7 +30,7 @@ export class TextRoomService {
             );
         }
 
-        const existTextRoom = await this.prisma.textRoom.findFirst({
+        const existTextRoom = await this.prismaService.textRoom.findFirst({
             where: {topicId, name: textRoomName},
         });
 
@@ -38,7 +40,7 @@ export class TextRoomService {
             );
         }
 
-        const newTextRoom = await this.prisma.textRoom.create({
+        const newTextRoom = await this.prismaService.textRoom.create({
             data: {topicId, name: textRoomName},
         });
 
@@ -46,11 +48,11 @@ export class TextRoomService {
     }
 
     async getExistTextRoom(textRoomId: string): Promise<TextRoom> {
-        return await this.prisma.textRoom.findUnique({where: {id: textRoomId}});
+        return await this.prismaService.textRoom.findUnique({where: {id: textRoomId}});
     }
 
     async sendTextMessage(userId: string, content: string, textRoomId: string) {
-        const textRoom = await this.prisma.textRoom.findUnique({
+        const textRoom = await this.prismaService.textRoom.findUnique({
             where: {id: textRoomId},
             include: {messages: true},
         });
@@ -59,13 +61,13 @@ export class TextRoomService {
             throw new Error('Text room not found');
         }
 
-        return await this.prisma.message.create({
+        return await this.prismaService.message.create({
             data: {textRoomId, content, authorId: userId},
         });
     }
 
     async deleteTextMessage(messageId: number) {
-        const message = await this.prisma.message.delete({
+        const message = await this.prismaService.message.delete({
             where: {id: messageId},
             select: {textRoomId: true, id: true},
         });
