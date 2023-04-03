@@ -1,12 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import {PrismaService} from "../core/prisma.service";
-import {CreateVoiceRoomDto} from "./dtos/create-voice-room.dto";
+import {Injectable} from '@nestjs/common';
+import {PrismaService} from '../core/prisma.service';
+import {CreateVoiceRoomDto} from './dtos/create-voice-room.dto';
 
 @Injectable()
 export class VoiceRoomService {
-    constructor(private readonly prismaService:PrismaService) {
+    constructor(private readonly prismaService: PrismaService) {
     }
-    async createVoiceRoom({name,topicId,channelId}:CreateVoiceRoomDto){
+
+    async createVoiceRoom({name, topicId, channelId}: CreateVoiceRoomDto) {
         const channel = await this.prismaService.channel.findUnique({
             where: {id: channelId},
             include: {Topics: {where: {id: topicId}, select: {id: true}}},

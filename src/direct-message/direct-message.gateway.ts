@@ -27,33 +27,45 @@ export class DirectMessageGateway extends CoreGateway implements OnGatewayInit {
         @MessageBody() {receiver, content}: SendMessageDto,
         @ConnectedSocket() socket: Socket,
     ) {
-        const userId = socket['user']?.id;
-        const {chat, message} = await this.directMessageService.sendMessage(
-            content,
-            userId,
-            receiver,
-        );
-        this._server
-            .to(this._connectedSockets.get(receiver))
-            .emit('receivedDirectMessage', {message, chat});
-        this._server.in(chat.id.toString()).emit('newMessage', {message});
+        try {
+            const userId = socket['user']?.id;
+            const {chat, message} = await this.directMessageService.sendMessage(
+                content,
+                userId,
+                receiver,
+            );
+            this._server
+                .to(this._connectedSockets.get(receiver))
+                .emit('receivedDirectMessage', {message, chat});
+            this._server.in(chat.id.toString()).emit('newMessage', {message});
+        } catch (err) {
+            this._DirectMessageGatewayLogger.error(err);
+        }
     }
 
     @UseGuards(WsAuthGuard)
     @UseFilters(new WebSocketExceptionsFilter())
     @SubscribeMessage('getMessages')
     async getMessages(@ConnectedSocket() socket: Socket) {
-        const userId = socket['user']?.id;
-        const messages = await this.directMessageService.getMessages(userId);
-        socket.emit('sentMessages', messages);
+        try {
+            const userId = socket['user']?.id;
+            const messages = await this.directMessageService.getMessages(userId);
+            socket.emit('sentMessages', messages);
+        } catch (err) {
+            this._DirectMessageGatewayLogger.error(err);
+        }
     }
 
     @UseGuards(WsAuthGuard)
     @UseFilters(new WebSocketExceptionsFilter())
     @SubscribeMessage('getChats')
     async getChats(@ConnectedSocket() socket: Socket) {
-        const userId = socket['user']?.id;
-        const chats = await this.directMessageService.getChats(userId);
-        socket.emit('existChats', chats);
+        try {
+            const userId = socket['user']?.id;
+            const chats = await this.directMessageService.getChats(userId);
+            socket.emit('existChats', chats);
+        } catch (err) {
+            this._DirectMessageGatewayLogger.error(err);
+        }
     }
 }
