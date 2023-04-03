@@ -77,11 +77,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: development
+      target: production
     depends_on:
       - postgres
       - elastic-search
       - kibana
+      - pgadmin
+      - redis
     environment:
       - ELASTICSEARCH_NODE=http://elastic-search:9200
       - DATABASE_URL=postgresql://admin:admin@postgres/discord?schema=public
@@ -91,7 +93,6 @@ services:
       - ./.env
     volumes:
       - .:/usr/src/app
-
     networks:
       discord_network:
 volumes:
